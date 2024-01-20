@@ -87,6 +87,7 @@
         (let ((run-last-buffer-point (point)))
           (when (assq 'i-from-texe args-alist)
             (with-current-buffer (get-buffer-create current-async-process-buffer-name)
+              (texe-set-header-line-process-start)
               (setq texe-process-local-run-last-buffer-point
                     run-last-buffer-point)
               (let ((copy-process texe-process-local-process))
@@ -154,6 +155,9 @@
 
 (defun texe-set-header-line-process-runnning ()
   (setq header-line-format (propertize "PROCESS RUNNING" 'face 'texe--face-process-running-header-line)))
+
+(defun texe-set-header-line-process-start ()
+  (setq header-line-format nil))
 
 (defun texe-set-header-line-process-success ()
   (setq header-line-format nil))

@@ -103,6 +103,7 @@
              (eq 'run (process-status texe-process-local-process)))
     (delete-process texe-process-local-process)
     (setq texe-process-local-process nil)
+    (texe-set-header-line-process-terminated)
     (message "PROCESS TERMINATED")))
 
 (defun texe-process-mode-texe ()

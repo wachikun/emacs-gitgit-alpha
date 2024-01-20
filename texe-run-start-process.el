@@ -74,11 +74,12 @@
                                                                    args-alist))
         (when (and (not (cdr (assq 'no-display-process-buffer args-alist)))
                    (not (assq 'texe-special-ignore-process-running
-                              special-result))
-                   background-p)
-          (texe--setup-run-at-time async-process-buffer-name
-                                   async-process-back-buffer-name pre-start-process-buffer-alist
-                                   buffer-erase-p))
+                              special-result)))
+          (if background-p
+              (texe--setup-background-run-at-time async-process-buffer-name
+                                                  async-process-back-buffer-name pre-start-process-buffer-alist)
+            (texe--setup-foreground-run-at-time async-process-buffer-name
+                                                pre-start-process-buffer-alist)))
         (texe--setup-process-buffer background-p special-result
                                     special command args-alist sentinel-callback
                                     call-texe-buffer-name backup-point-alist buffer-erase-p
@@ -156,6 +157,9 @@
 (defun texe-set-header-line-process-runnning ()
   (setq header-line-format (propertize "PROCESS RUNNING" 'face 'texe--face-process-running-header-line)))
 
+(defun texe-set-header-line-process-terminated ()
+  (setq header-line-format (propertize "TERMINATED" 'face 'texe--face-process-running-header-line)))
+
 (defun texe-set-header-line-process-start ()
   (setq header-line-format nil))
 
@@ -168,8 +172,8 @@
                                        'face
                                        'texe--face-process-running-header-line)))
 
-(defun texe--setup-run-at-time (async-process-buffer-name async-process-back-buffer-name
-                                                          pre-start-process-buffer-alist buffer-erase-p)
+(defun texe--setup-background-run-at-time (async-process-buffer-name async-process-back-buffer-name
+                                                                     pre-start-process-buffer-alist)
   (run-at-time texe--process-running-message-delay-second
                nil
                (lambda ()
@@ -180,8 +184,19 @@
                        (if window
                            (set-window-buffer window async-process-back-buffer-name)
                          (switch-to-buffer async-process-back-buffer-name)))
-                     (with-current-buffer async-process-back-buffer-name
-                       (texe-set-header-line-process-runnning)))))))
+                     (when (get-process async-process-back-buffer-name)
+                       (with-current-buffer async-process-back-buffer-name
+                         (texe-set-header-line-process-runnning))))))))
+
+(defun texe--setup-foreground-run-at-time (async-process-buffer-name pre-start-process-buffer-alist)
+  (run-at-time texe--process-running-message-delay-second
+               nil
+               (lambda ()
+                 (when (get-buffer async-process-buffer-name)
+                   (when (not pre-start-process-buffer-alist)
+                     (when (get-process async-process-buffer-name)
+                       (with-current-buffer async-process-buffer-name
+                         (texe-set-header-line-process-runnning))))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
                                                 args-alist sentinel-callback call-texe-buffer-name

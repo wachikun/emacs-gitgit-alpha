@@ -51,6 +51,12 @@
 (defconst texe--process-running-message-delay-second
   1)
 
+(defconst texe--process-running-recenter-delay-second-first
+  0.1)
+
+(defconst texe--process-running-recenter-delay-second-second
+  2)
+
 (defvar texe--processes 0)
 
 (defun texe-run-start-process (background-p special command async-process-buffer-name
@@ -192,11 +198,31 @@
   (run-at-time texe--process-running-message-delay-second
                nil
                (lambda ()
-                 (when (get-buffer async-process-buffer-name)
-                   (when (not pre-start-process-buffer-alist)
-                     (when (get-process async-process-buffer-name)
-                       (with-current-buffer async-process-buffer-name
-                         (texe-set-header-line-process-runnning))))))))
+                 (when (and (get-buffer async-process-buffer-name)
+                            (not pre-start-process-buffer-alist)
+                            (get-process async-process-buffer-name))
+                   (with-current-buffer async-process-buffer-name
+                     (texe-set-header-line-process-runnning)
+                     (when (get-buffer-window (current-buffer))
+                       (recenter))))))
+  (run-at-time texe--process-running-recenter-delay-second-first
+               nil
+               (lambda ()
+                 (when (and (get-buffer async-process-buffer-name)
+                            (not pre-start-process-buffer-alist)
+                            (get-process async-process-buffer-name))
+                   (with-current-buffer async-process-buffer-name
+                     (when (get-buffer-window (current-buffer))
+                       (recenter))))))
+  (run-at-time texe--process-running-recenter-delay-second-second
+               nil
+               (lambda ()
+                 (when (and (get-buffer async-process-buffer-name)
+                            (not pre-start-process-buffer-alist)
+                            (get-process async-process-buffer-name))
+                   (with-current-buffer async-process-buffer-name
+                     (when (get-buffer-window (current-buffer))
+                       (recenter)))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
                                                 args-alist sentinel-callback call-texe-buffer-name
@@ -211,7 +237,6 @@
                                                  current-async-process-buffer-name
                                                  (if script-tmpfile script-tmpfile command))))
       (set-process-sentinel process 'texe--process-sentinel)
-      (set-process-filter process 'texe--process-filter)
       (texe-mode-process-mode)
       (texe-process-make-local-variable)
       (setq texe-process-local-backup-point-alist
@@ -309,15 +334,5 @@
       (display-buffer (buffer-name))
       (texe-set-header-line-process-error event))
      (t (message (concat "process error error:" event))))))
-
-(defun texe--process-filter (proc string)       
-  (with-current-buffer (process-buffer proc)         
-    (save-excursion                                
-      (goto-char (process-mark proc))              
-      (setq buffer-read-only nil)
-      (insert string)                              
-      (setq buffer-read-only t)
-      (set-marker (process-mark proc) (point)))    
-    (goto-char (process-mark proc))))
 
 (provide 'texe-run-start-process)

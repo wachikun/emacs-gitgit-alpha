@@ -211,6 +211,7 @@
                                                  current-async-process-buffer-name
                                                  (if script-tmpfile script-tmpfile command))))
       (set-process-sentinel process 'texe--process-sentinel)
+      (set-process-filter process 'texe--process-filter)
       (texe-mode-process-mode)
       (texe-process-make-local-variable)
       (setq texe-process-local-backup-point-alist
@@ -308,5 +309,15 @@
       (display-buffer (buffer-name))
       (texe-set-header-line-process-error event))
      (t (message (concat "process error error:" event))))))
+
+(defun texe--process-filter (proc string)       
+  (with-current-buffer (process-buffer proc)         
+    (save-excursion                                
+      (goto-char (process-mark proc))              
+      (setq buffer-read-only nil)
+      (insert string)                              
+      (setq buffer-read-only t)
+      (set-marker (process-mark proc) (point)))    
+    (goto-char (process-mark proc))))
 
 (provide 'texe-run-start-process)

@@ -203,8 +203,10 @@
                             (get-process async-process-buffer-name))
                    (with-current-buffer async-process-buffer-name
                      (texe-set-header-line-process-runnning)
-                     (when (get-buffer-window (current-buffer))
-                       (recenter))))))
+                     (let ((window (get-buffer-window (current-buffer))))
+                       (when window
+                         (with-selected-window window
+                           (recenter))))))))
   (run-at-time texe--process-running-recenter-delay-second-first
                nil
                (lambda ()
@@ -212,8 +214,10 @@
                             (not pre-start-process-buffer-alist)
                             (get-process async-process-buffer-name))
                    (with-current-buffer async-process-buffer-name
-                     (when (get-buffer-window (current-buffer))
-                       (recenter))))))
+                     (let ((window (get-buffer-window (current-buffer))))
+                       (when window
+                         (with-selected-window window
+                           (recenter))))))))
   (run-at-time texe--process-running-recenter-delay-second-second
                nil
                (lambda ()
@@ -221,8 +225,10 @@
                             (not pre-start-process-buffer-alist)
                             (get-process async-process-buffer-name))
                    (with-current-buffer async-process-buffer-name
-                     (when (get-buffer-window (current-buffer))
-                       (recenter)))))))
+                     (let ((window (get-buffer-window (current-buffer))))
+                       (when window
+                         (with-selected-window window
+                           (recenter)))))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
                                                 args-alist sentinel-callback call-texe-buffer-name

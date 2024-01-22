@@ -162,12 +162,15 @@
               (format " <%d>" count))
             "*")))
 
-(defun gitgit--get-texe-full-path-name (buffer-name)
-  (string-match "^\\(.+?\\)\\( <[0-9]+>\\)?\\*$"
-                buffer-name)
-  (concat gitgit-default-texe-directory
-          (match-string 1 buffer-name)
-          "*"))
+(defun gitgit--get-texe-full-path-name (initial-directory buffer-name)
+  (let ((texe-file (cdr (assoc initial-directory gitgit-texe-alist))))
+    (if texe-file
+        texe-file
+      (string-match "^\\(.+?\\)\\( <[0-9]+>\\)?\\*$"
+                    buffer-name)
+      (concat gitgit-default-texe-directory
+              (match-string 1 buffer-name)
+              "*"))))
 
 (defun gitgit--update-git-and-files-end-points ()
   (save-excursion
@@ -274,18 +277,17 @@ texe 実行後に status を更新するための callback 。"
         (match-string 1)
       "?")))
 
-(defun gitgit--draw-texe-buffer ()
+(defun gitgit--draw-texe-buffer (texe-full-path-name)
   (unless (buffer-modified-p)
-    (let ((file-name (gitgit--get-texe-full-path-name (buffer-name))))
-      (setq buffer-read-only nil)
-      (buffer-disable-undo)
-      (erase-buffer)
-      (if (file-exists-p file-name)
-          (insert-file-contents file-name)
-        (insert gitgit-mode-default-texe))
-      (buffer-enable-undo)
-      (set-buffer-modified-p nil)
-      (goto-char (point-min)))))
+    (setq buffer-read-only nil)
+    (buffer-disable-undo)
+    (erase-buffer)
+    (if (file-exists-p texe-full-path-name)
+        (insert-file-contents texe-full-path-name)
+      (insert gitgit-mode-default-texe))
+    (buffer-enable-undo)
+    (set-buffer-modified-p nil)
+    (goto-char (point-min))))
 
 (defun gitgit--run-initialize-scripts ()
   (save-excursion
@@ -323,18 +325,22 @@ texe 実行後に status を更新するための callback 。"
                    (texe-set-header-line-process-runnning)))))
 
 (defun gitgit--setup-first (texe-buffer-name initial-directory)
+  (unless (string-match "/$" initial-directory)
+    (setq initial-directory (concat initial-directory "/")))
   (gitgit--setup-temporary-file-directory)
   (when (get-buffer texe-buffer-name)
     (kill-buffer texe-buffer-name))
-  (let ((status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name)))
+  (let ((status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name))
+        (texe-full-path-name (gitgit--get-texe-full-path-name initial-directory
+                                                              (buffer-name))))
     (set-buffer (get-buffer-create texe-buffer-name))
-    (set-visited-file-name (gitgit--get-texe-full-path-name (buffer-name))
+    (set-visited-file-name texe-full-path-name
                            t)
     (rename-buffer texe-buffer-name)
     (set-buffer-modified-p nil)
     (setq default-directory initial-directory)
     (gitgit--setup-texe-mode)
-    (gitgit--draw-texe-buffer)
+    (gitgit--draw-texe-buffer texe-full-path-name)
     (texe-setup-default-special-regexp)
     (gitgit--run-initialize-scripts)
     (add-hook 'texe-sentinel-callback-hook 'gitgit--texe-sentinel-callback)

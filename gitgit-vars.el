@@ -363,6 +363,13 @@ git commit
 temporary-file-directory とは別に userid ごとに用意しておく。
 (user ごとに分けておかないと permission 関連の問題が発生することがある)")
 
+(defcustom gitgit-texe-alist nil "directory ごとに texe を
+'((directory-a . texe-a) (directory-b . texe-b)) な alist で指定する。
+directory は / で終端することに注意。
+gitgit-texe-alist に存在しなければ gitgit-default-texe-directory 内に
+buffer name から生成された texe が使用される。" :type 'string
+:group 'gitgit-variables)
+
 (defcustom gitgit-default-texe-directory "~/.emacs.d/.gitgit.texe/"
   "gitgit-default-texe-directory" :type 'string
   :group 'gitgit-variables)

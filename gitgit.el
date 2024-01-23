@@ -163,14 +163,19 @@
             "*")))
 
 (defun gitgit--get-texe-full-path-name (initial-directory buffer-name)
-  (let ((texe-file (cdr (assoc initial-directory gitgit-texe-alist))))
-    (if texe-file
-        texe-file
-      (string-match "^\\(.+?\\)\\( <[0-9]+>\\)?\\*$"
-                    buffer-name)
-      (concat gitgit-default-texe-directory
-              (match-string 1 buffer-name)
-              "*"))))
+  (let ((expanded-initial-directory (expand-file-name initial-directory))
+        (cooked-alist
+         (mapcar (lambda (a)
+                   `(,(expand-file-name (car a)) . ,(cdr a)))
+                 gitgit-texe-alist)))
+    (let ((texe-file (cdr (assoc expanded-initial-directory cooked-alist))))
+      (if texe-file
+          texe-file
+        (string-match "^\\(.+?\\)\\( <[0-9]+>\\)?\\*$"
+                      buffer-name)
+        (concat gitgit-default-texe-directory
+                (match-string 1 buffer-name)
+                "*")))))
 
 (defun gitgit--update-git-and-files-end-points ()
   (save-excursion
@@ -325,20 +330,19 @@ texe 実行後に status を更新するための callback 。"
                    (texe-set-header-line-process-runnning)))))
 
 (defun gitgit--setup-first (texe-buffer-name initial-directory)
-  (unless (string-match "/$" initial-directory)
-    (setq initial-directory (concat initial-directory "/")))
   (gitgit--setup-temporary-file-directory)
   (when (get-buffer texe-buffer-name)
     (kill-buffer texe-buffer-name))
-  (let ((status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name))
-        (texe-full-path-name (gitgit--get-texe-full-path-name initial-directory
-                                                              (buffer-name))))
+  (let* ((expanded-initial-directory (expand-file-name initial-directory))
+         (status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name))
+         (texe-full-path-name (gitgit--get-texe-full-path-name expanded-initial-directory
+                                                               texe-buffer-name)))
     (set-buffer (get-buffer-create texe-buffer-name))
     (set-visited-file-name texe-full-path-name
                            t)
     (rename-buffer texe-buffer-name)
     (set-buffer-modified-p nil)
-    (setq default-directory initial-directory)
+    (setq default-directory expanded-initial-directory)
     (gitgit--setup-texe-mode)
     (gitgit--draw-texe-buffer texe-full-path-name)
     (texe-setup-default-special-regexp)

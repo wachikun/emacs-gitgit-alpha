@@ -79,6 +79,7 @@
   (interactive "Ddirectory: ")
   (unless (string-match "/$" initial-directory)
     (setq initial-directory (concat initial-directory "/")))
+  (setq initial-directory (expand-file-name initial-directory))
   (if (file-directory-p initial-directory)
       (let ((texe-buffer-name (gitgit--create-buffer-name gitgit-texe-file-name-prefix
                                                           initial-directory)))
@@ -143,32 +144,31 @@
       (gitgit--get-branch-from-top-line))))
 
 (defun gitgit--create-buffer-name (prefix initial-directory)
-  (let ((expanded-initial-directory (expand-file-name initial-directory)) buffer-name-base
+  (let (buffer-name-base
         count)
-    (string-match "/\\([^/]+\\)/$" expanded-initial-directory)
-    (setq buffer-name-base (match-string 1 expanded-initial-directory))
-    (if (gethash expanded-initial-directory gitgit--initial-directory-hash)
-        (setq count (gethash expanded-initial-directory gitgit--initial-directory-hash))
+    (string-match "/\\([^/]+\\)/$" initial-directory)
+    (setq buffer-name-base (match-string 1 initial-directory))
+    (if (gethash initial-directory gitgit--initial-directory-hash)
+        (setq count (gethash initial-directory gitgit--initial-directory-hash))
       (let ((plus-one-count (1+ (gethash buffer-name-base gitgit--buffer-name-count-hash
                                          0))))
         (setq count plus-one-count)
         (puthash buffer-name-base plus-one-count gitgit--buffer-name-count-hash)
-        (puthash expanded-initial-directory plus-one-count
+        (puthash initial-directory plus-one-count
                  gitgit--initial-directory-hash)))
     (concat prefix
-            (match-string 1 expanded-initial-directory)
+            (match-string 1 initial-directory)
             (if (= count 1)
                 ""
               (format " <%d>" count))
             "*")))
 
 (defun gitgit--get-texe-full-path-name (initial-directory buffer-name)
-  (let ((expanded-initial-directory (expand-file-name initial-directory))
-        (cooked-alist
+  (let ((cooked-alist
          (mapcar (lambda (a)
                    `(,(expand-file-name (car a)) . ,(cdr a)))
                  gitgit-texe-alist)))
-    (let ((texe-file (cdr (assoc expanded-initial-directory cooked-alist))))
+    (let ((texe-file (cdr (assoc initial-directory cooked-alist))))
       (if texe-file
           texe-file
         (string-match "^\\(.+?\\)\\( <[0-9]+>\\)?\\*$"
@@ -333,16 +333,15 @@ texe 実行後に status を更新するための callback 。"
   (gitgit--setup-temporary-file-directory)
   (when (get-buffer texe-buffer-name)
     (kill-buffer texe-buffer-name))
-  (let* ((expanded-initial-directory (expand-file-name initial-directory))
-         (status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name))
-         (texe-full-path-name (gitgit--get-texe-full-path-name expanded-initial-directory
+  (let* ((status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name))
+         (texe-full-path-name (gitgit--get-texe-full-path-name initial-directory
                                                                texe-buffer-name)))
     (set-buffer (get-buffer-create texe-buffer-name))
     (set-visited-file-name texe-full-path-name
                            t)
     (rename-buffer texe-buffer-name)
     (set-buffer-modified-p nil)
-    (setq default-directory expanded-initial-directory)
+    (setq default-directory initial-directory)
     (gitgit--setup-texe-mode)
     (gitgit--draw-texe-buffer texe-full-path-name)
     (texe-setup-default-special-regexp)

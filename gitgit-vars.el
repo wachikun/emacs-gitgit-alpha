@@ -66,8 +66,8 @@
 
 git remote show origin
 
-git --no-pager log -n 8 --graph --decorate=full --stat
-git --no-pager log -n 8 --graph --decorate=full --patch-with-stat
+git log -n 8 --graph --decorate=full --stat
+git log -n 8 --graph --decorate=full --patch-with-stat
 
 
 
@@ -76,7 +76,7 @@ git --no-pager log -n 8 --graph --decorate=full --patch-with-stat
 git merge --no-ff BRANCH
 git checkout BASE
 git rebase --interactive BASE
-git --no-pager diff master BRANCH
+git diff master BRANCH
 git checkout -b BRANCH
 
 
@@ -336,20 +336,20 @@ git status --long
 # gitgit-git-[command] のように記述することで指定可能。
 
 #@gitgit-git-blame (progn (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-point-min))
-git --no-pager blame '--date=format:%Y-%m-%d %H:%m' 2> /dev/null
+git blame '--date=format:%Y-%m-%d %H:%m' 2> /dev/null
 # 日時は gitgit で参照していないので形式は任意
 # ここでは横幅を取らない形で指定している。
 
 
 #@gitgit-git-log (progn (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min))
-git --no-pager log -n 32 --stat-width=800 --graph --decorate=full --stat
-# git --no-pager log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat
+git log -n 32 --stat-width=800 --graph --decorate=full --stat
+# git log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat
 # 大きなプロジェクトでは --graph などを外してしまうと高速
-# git --no-pager log -n 32 --stat-width=800
+# git log -n 32 --stat-width=800
 
 
 #@gitgit-git-diff (progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-point-min) (texe-special-keep-select-texe-buffer))
-git --no-pager diff
+git diff
 
 
 #@gitgit-git-commit (texe-special-keep-select-texe-buffer)

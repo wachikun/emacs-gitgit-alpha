@@ -238,25 +238,26 @@
     (setq buffer-read-only nil)
     (erase-buffer)
     (setq buffer-read-only t)
-    (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist)))
-           (process (start-process-shell-command current-async-process-buffer-name
-                                                 current-async-process-buffer-name
-                                                 (if script-tmpfile script-tmpfile command))))
-      (set-process-sentinel process 'texe--process-sentinel)
-      (texe-mode-process-mode)
-      (texe-process-make-local-variable)
-      (setq texe-process-local-backup-point-alist
-            backup-point-alist)
-      (setq texe-process-local-buffer-erase-p buffer-erase-p)
-      (setq texe-process-local-process-start-point-min (point-min))
-      (setq texe-process-local-special special)
-      (setq texe-process-local-special-result special-result)
-      (setq texe-process-local-command command)
-      (setq texe-process-local-process process)
-      (setq texe-process-local-args-alist args-alist)
-      (setq texe-process-local-sentinel-callback
-            sentinel-callback)
-      (setq texe-process-local-background-p background-p))
+    (with-environment-variables (("PAGER" ""))
+      (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist)))
+             (process (start-process-shell-command current-async-process-buffer-name
+                                                   current-async-process-buffer-name
+                                                   (if script-tmpfile script-tmpfile command))))
+        (set-process-sentinel process 'texe--process-sentinel)
+        (texe-mode-process-mode)
+        (texe-process-make-local-variable)
+        (setq texe-process-local-backup-point-alist
+              backup-point-alist)
+        (setq texe-process-local-buffer-erase-p buffer-erase-p)
+        (setq texe-process-local-process-start-point-min (point-min))
+        (setq texe-process-local-special special)
+        (setq texe-process-local-special-result special-result)
+        (setq texe-process-local-command command)
+        (setq texe-process-local-process process)
+        (setq texe-process-local-args-alist args-alist)
+        (setq texe-process-local-sentinel-callback
+              sentinel-callback)
+        (setq texe-process-local-background-p background-p)))
     (add-to-list 'texe-process-local-args-alist
                  (cons 'i-texe-buffer-name call-texe-buffer-name))))
 

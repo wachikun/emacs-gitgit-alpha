@@ -75,8 +75,7 @@
       (if (get-process current-async-process-buffer-name)
           (message "process running")
         (setq backup-point-alist (texe--setup-async-process-buffer async-process-buffer-name
-                                                                   buffer-erase-p
-                                                                   args-alist))
+                                                                   buffer-erase-p args-alist))
         (when (and (not (cdr (assq 'no-display-process-buffer args-alist)))
                    (not (assq 'texe-special-ignore-process-running
                               special-result)))
@@ -95,11 +94,10 @@
               (texe-set-header-line-process-start)
               (setq texe-process-local-run-last-buffer-point
                     run-last-buffer-point)
-              (if background-p
+              (when background-p
                 (let ((copy-process texe-process-local-process))
                   (with-current-buffer (get-buffer-create async-process-buffer-name)
-                    (setq texe-process-local-process copy-process)))
-                (message "DB: NOT")))))
+                    (setq texe-process-local-process copy-process)))))))
         (puthash current-async-process-buffer-name
                  t texe-process-running-p-hash)
         (texe--display-async-process-buffer background-p
@@ -137,8 +135,8 @@
                                             (format-time-string "%Y-%m-%d-%H:%M:%S"))))
    (t async-process-buffer-name)))
 
-(defun texe--setup-async-process-buffer (async-process-buffer-name 
-                                         buffer-erase-p args-alist)
+(defun texe--setup-async-process-buffer (async-process-buffer-name buffer-erase-p
+                                                                   args-alist)
   (let (result-backup-point-alist)
     (when (get-buffer async-process-buffer-name)
       (with-current-buffer async-process-buffer-name

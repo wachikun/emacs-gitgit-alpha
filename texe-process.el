@@ -144,11 +144,11 @@ texe 実行後に実行される callback 。"
 (defun texe-process-get-local-variable-list ()
   (if (boundp 'texe-process-local-backup-point-alist)
       (list texe-process-local-backup-point-alist
-            texe-process-local-buffer-erase-p
-            texe-process-local-special texe-process-local-special-result
-            texe-process-local-command texe-process-local-process
-            texe-process-local-args-alist texe-process-local-sentinel-callback
-            texe-process-local-run-last-buffer-point texe-process-local-background-p)
+            texe-process-local-buffer-erase-p texe-process-local-special
+            texe-process-local-special-result texe-process-local-command
+            texe-process-local-process texe-process-local-args-alist
+            texe-process-local-sentinel-callback texe-process-local-run-last-buffer-point
+            texe-process-local-background-p)
     nil))
 
 (defun texe-process-update-local-variable-list (variable-list)

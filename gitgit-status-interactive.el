@@ -104,7 +104,7 @@
 
 (defun gitgit-status--run-commit ()
   (interactive)
-  (gitgit-status--run-for-commit nil "commit"
+  (gitgit-status--run-commit-1 nil "commit"
                                  "commit" 'gitgit-status--sentinel-callback-reload-status
                                  nil))
 
@@ -401,26 +401,32 @@
           (push file-name file-list))))
     file-list))
 
-(defun gitgit-status--get-git-log-for-commit ()
-  (shell-command-to-string (concat gitgit-internal-git-command " log -n 3")))
-
-(defun gitgit-status--run-for-commit (no-display-process-buffer-p git-command buffer-name-suffix
+(defun gitgit-status--run-commit-1 (no-display-process-buffer-p git-command buffer-name-suffix
                                                                   sentinel-callback &optional file-list command-filter)
-  (let ((buffer-name (concat (gitgit-get-texe-buffer-name-from-related-buffer)
+  (let* ((commit-buffer-name (concat (gitgit-get-texe-buffer-name-from-related-buffer)
                              " "
                              buffer-name-suffix))
-        (branch (gitgit--get-branch-from-top-line))
-        pre-start-process-buffer-alist)
-    (with-temp-buffer
-      (insert (concat branch "\n\n"))
-      (insert "# recent log\n\n")
-      (insert (gitgit-status--get-git-log-for-commit))
-      (gitgit-log-update-faces)
-      (setq pre-start-process-buffer-alist (list (cons 'contents (buffer-string))
-                                                 (cons 'function 'gitgit-log-mode))))
+         (log-buffer-name (concat commit-buffer-name "-log"))
+         (branch (gitgit--get-branch-from-top-line)))
+    (save-excursion
     (gitgit-status--run-1 no-display-process-buffer-p
-                          git-command buffer-name sentinel-callback
-                          file-list command-filter t pre-start-process-buffer-alist)))
+                          git-command commit-buffer-name sentinel-callback
+                          file-list command-filter t))
+    (gitgit-status--run-commit-1-show-log-buffer log-buffer-name branch)))
+
+(defun gitgit-status--run-commit-1-show-log-buffer (buffer-name branch)
+  (with-current-buffer (get-buffer-create buffer-name)
+    (setq buffer-undo-list t)
+    (setq buffer-read-only nil)
+    (erase-buffer)
+    (insert (concat branch "\n\n"))
+    (insert "# recent log\n\n")
+    (insert (shell-command-to-string (concat gitgit-internal-git-command " log -n 3")))
+    (gitgit-log-update-faces)
+    (gitgit-log-mode)
+    (setq buffer-read-only t)
+    (goto-char (point-min))
+    (display-buffer buffer-name)))
 
 (defun gitgit-status--mark-re-search-forward (file-name)
   "file-name を持つ git files または files を re-search-forward する"

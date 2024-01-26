@@ -71,21 +71,19 @@
     (let* ((call-texe-buffer-name (buffer-name)) backup-point-alist
            (async-process-back-buffer-name (texe-get-process-back-buffer-name async-process-buffer-name))
            (current-async-process-buffer-name (if background-p async-process-back-buffer-name
-                                                async-process-buffer-name))
-           (pre-start-process-buffer-alist (cdr (assq 'pre-start-process-buffer-alist args-alist))))
+                                                async-process-buffer-name)))
       (if (get-process current-async-process-buffer-name)
           (message "process running")
         (setq backup-point-alist (texe--setup-async-process-buffer async-process-buffer-name
-                                                                   pre-start-process-buffer-alist buffer-erase-p
+                                                                   buffer-erase-p
                                                                    args-alist))
         (when (and (not (cdr (assq 'no-display-process-buffer args-alist)))
                    (not (assq 'texe-special-ignore-process-running
                               special-result)))
           (if background-p
               (texe--setup-background-run-at-time async-process-buffer-name
-                                                  async-process-back-buffer-name pre-start-process-buffer-alist)
-            (texe--setup-foreground-run-at-time async-process-buffer-name
-                                                pre-start-process-buffer-alist)))
+                                                  async-process-back-buffer-name)
+            (texe--setup-foreground-run-at-time async-process-buffer-name)))
         (texe--setup-process-buffer background-p special-result
                                     special command args-alist sentinel-callback
                                     call-texe-buffer-name backup-point-alist buffer-erase-p
@@ -97,9 +95,11 @@
               (texe-set-header-line-process-start)
               (setq texe-process-local-run-last-buffer-point
                     run-last-buffer-point)
-              (let ((copy-process texe-process-local-process))
-                (with-current-buffer (get-buffer-create async-process-buffer-name)
-                  (setq texe-process-local-process copy-process))))))
+              (if background-p
+                (let ((copy-process texe-process-local-process))
+                  (with-current-buffer (get-buffer-create async-process-buffer-name)
+                    (setq texe-process-local-process copy-process)))
+                (message "DB: NOT")))))
         (puthash current-async-process-buffer-name
                  t texe-process-running-p-hash)
         (texe--display-async-process-buffer background-p
@@ -137,8 +137,8 @@
                                             (format-time-string "%Y-%m-%d-%H:%M:%S"))))
    (t async-process-buffer-name)))
 
-(defun texe--setup-async-process-buffer (async-process-buffer-name pre-start-process-buffer-alist
-                                                                   buffer-erase-p args-alist)
+(defun texe--setup-async-process-buffer (async-process-buffer-name 
+                                         buffer-erase-p args-alist)
   (let (result-backup-point-alist)
     (when (get-buffer async-process-buffer-name)
       (with-current-buffer async-process-buffer-name
@@ -150,10 +150,6 @@
     (with-current-buffer (get-buffer-create async-process-buffer-name)
       (setq buffer-undo-list t)
       (setq buffer-read-only nil)
-      (when pre-start-process-buffer-alist
-        (insert (cdr (assq 'contents pre-start-process-buffer-alist)))
-        (funcall (cdr (assq 'function pre-start-process-buffer-alist)))
-        (goto-char (point-min)))
       (when (assq 'i-from-texe args-alist)
         (texe-mode-process-mode)
         (texe-process-make-local-variable))
@@ -178,57 +174,41 @@
                                        'face
                                        'texe--face-process-running-header-line)))
 
-(defun texe--setup-background-run-at-time (async-process-buffer-name async-process-back-buffer-name
-                                                                     pre-start-process-buffer-alist)
+(defun texe--setup-background-run-at-time (async-process-buffer-name async-process-back-buffer-name)
   (run-at-time texe--process-running-message-delay-second
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
                             (get-buffer async-process-back-buffer-name))
-                   (when (not pre-start-process-buffer-alist)
-                     (let ((window (get-buffer-window async-process-buffer-name)))
-                       (if window
-                           (set-window-buffer window async-process-back-buffer-name)
-                         (switch-to-buffer async-process-back-buffer-name)))
-                     (when (get-process async-process-back-buffer-name)
-                       (with-current-buffer async-process-back-buffer-name
-                         (texe-set-header-line-process-runnning))))))))
+                   (let ((window (get-buffer-window async-process-buffer-name)))
+                     (if window
+                         (set-window-buffer window async-process-back-buffer-name)
+                       (switch-to-buffer async-process-back-buffer-name)))
+                   (when (get-process async-process-back-buffer-name)
+                     (with-current-buffer async-process-back-buffer-name
+                       (texe-set-header-line-process-runnning)))))))
 
-(defun texe--setup-foreground-run-at-time (async-process-buffer-name pre-start-process-buffer-alist)
+(defun texe--setup-foreground-run-at-time (async-process-buffer-name)
   (run-at-time texe--process-running-message-delay-second
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
-                            (not pre-start-process-buffer-alist)
                             (get-process async-process-buffer-name))
                    (with-current-buffer async-process-buffer-name
                      (texe-set-header-line-process-runnning)
-                     (let ((window (get-buffer-window (current-buffer))))
-                       (when window
-                         (with-selected-window window
-                           (recenter))))))))
+                     (texe--show-process-buffer-content (current-buffer))))))
   (run-at-time texe--process-running-recenter-delay-second-first
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
-                            (not pre-start-process-buffer-alist)
                             (get-process async-process-buffer-name))
-                   (with-current-buffer async-process-buffer-name
-                     (let ((window (get-buffer-window (current-buffer))))
-                       (when window
-                         (with-selected-window window
-                           (recenter))))))))
+                   (texe--show-process-buffer-content (current-buffer)))))
   (run-at-time texe--process-running-recenter-delay-second-second
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
-                            (not pre-start-process-buffer-alist)
                             (get-process async-process-buffer-name))
-                   (with-current-buffer async-process-buffer-name
-                     (let ((window (get-buffer-window (current-buffer))))
-                       (when window
-                         (with-selected-window window
-                           (recenter)))))))))
+                   (texe--show-process-buffer-content (current-buffer))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
                                                 args-alist sentinel-callback call-texe-buffer-name
@@ -249,7 +229,6 @@
         (setq texe-process-local-backup-point-alist
               backup-point-alist)
         (setq texe-process-local-buffer-erase-p buffer-erase-p)
-        (setq texe-process-local-process-start-point-min (point-min))
         (setq texe-process-local-special special)
         (setq texe-process-local-special-result special-result)
         (setq texe-process-local-command command)
@@ -331,6 +310,7 @@
                     backup-point-alist))
             (when texe-process-local-sentinel-callback
               (funcall texe-process-local-sentinel-callback)))
+        (texe--show-process-buffer-content (current-buffer))
         (when texe-process-local-sentinel-callback
           (funcall texe-process-local-sentinel-callback))))
     (cond
@@ -341,5 +321,11 @@
       (display-buffer (buffer-name))
       (texe-set-header-line-process-error event))
      (t (message (concat "process error error:" event))))))
+
+(defun texe--show-process-buffer-content (buffer-name)
+  (let ((window (get-buffer-window buffer-name)))
+    (when window
+      (with-selected-window window
+        (recenter)))))
 
 (provide 'texe-run-start-process)

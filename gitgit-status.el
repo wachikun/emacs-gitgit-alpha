@@ -217,7 +217,7 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
 
 (defun gitgit-status--run-1 (no-display-process-buffer-p git-command buffer-name
                                                          sentinel-callback file-list command-filter
-                                                         buffer-erase-p pre-start-process-buffer-alist)
+                                                         buffer-erase-p)
   (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
     (let* (special (search-special (concat "#@gitgit-git-" git-command))
                    (special-before (concat "#@elisp-before-gitgit-git-" git-command))
@@ -226,8 +226,7 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
                    (command (gitgit-status--get-command search-special
                                                         gitgit-internal-git-command))
                    (args-alist (list (cons 'file-list file-list)
-                                     (cons 'no-display-process-buffer no-display-process-buffer-p)
-                                     (cons 'pre-start-process-buffer-alist pre-start-process-buffer-alist))))
+                                     (cons 'no-display-process-buffer no-display-process-buffer-p))))
       (save-excursion
         (goto-char (point-min))
         (when (re-search-forward (concat "^" search-special)
@@ -259,6 +258,6 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
                              buffer-name-suffix)))
     (gitgit-status--run-1 no-display-process-buffer-p
                           git-command buffer-name sentinel-callback
-                          file-list command-filter nil nil)))
+                          file-list command-filter nil)))
 
 (provide 'gitgit-status)

@@ -144,11 +144,10 @@ texe 実行後に実行される callback 。"
 (defun texe-process-get-local-variable-list ()
   (if (boundp 'texe-process-local-backup-point-alist)
       (list texe-process-local-backup-point-alist
-            texe-process-local-buffer-erase-p texe-process-local-process-start-point-min
+            texe-process-local-buffer-erase-p
             texe-process-local-special texe-process-local-special-result
             texe-process-local-command texe-process-local-process
             texe-process-local-args-alist texe-process-local-sentinel-callback
-            texe-process-local-default-special-regexp-list
             texe-process-local-run-last-buffer-point texe-process-local-background-p)
     nil))
 
@@ -156,23 +155,19 @@ texe 実行後に実行される callback 。"
   (when variable-list
     (setq texe-process-local-backup-point-alist (nth 0 variable-list))
     (setq texe-process-local-buffer-erase-p (nth 1 variable-list))
-    (setq texe-process-local-process-start-point-min (nth 2 variable-list))
-    (setq texe-process-local-special (nth 3 variable-list))
-    (setq texe-process-local-special-result (nth 4 variable-list))
-    (setq texe-process-local-command (nth 5 variable-list))
-    (setq texe-process-local-process (nth 6 variable-list))
-    (setq texe-process-local-args-alist (nth 7 variable-list))
-    (setq texe-process-local-sentinel-callback (nth 8 variable-list))
-    (setq texe-process-local-default-special-regexp-list (nth 9 variable-list))
-    (setq texe-process-local-run-last-buffer-point (nth 10 variable-list))
-    (setq texe-process-local-background-p (nth 11 variable-list))))
+    (setq texe-process-local-special (nth 2 variable-list))
+    (setq texe-process-local-special-result (nth 3 variable-list))
+    (setq texe-process-local-command (nth 4 variable-list))
+    (setq texe-process-local-process (nth 5 variable-list))
+    (setq texe-process-local-args-alist (nth 6 variable-list))
+    (setq texe-process-local-sentinel-callback (nth 7 variable-list))
+    (setq texe-process-local-run-last-buffer-point (nth 8 variable-list))
+    (setq texe-process-local-background-p (nth 9 variable-list))))
 
 (defun texe-process-make-local-variable ()
   (set (make-local-variable 'texe-process-local-backup-point-alist)
        nil)
   (set (make-local-variable 'texe-process-local-buffer-erase-p)
-       nil)
-  (set (make-local-variable 'texe-process-local-process-start-point-min)
        nil)
   (set (make-local-variable 'texe-process-local-special)
        nil)
@@ -185,8 +180,6 @@ texe 実行後に実行される callback 。"
   (set (make-local-variable 'texe-process-local-args-alist)
        nil)
   (set (make-local-variable 'texe-process-local-sentinel-callback)
-       nil)
-  (set (make-local-variable 'texe-process-local-default-special-regexp-list)
        nil)
   (set (make-local-variable 'texe-process-local-run-last-buffer-point)
        nil)

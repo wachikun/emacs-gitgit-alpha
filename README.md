@@ -9,8 +9,8 @@
 下記のような特徴があります。
 
 - `M-x gitgit` から呼ばれる gitgit status と呼ばれるメニューから、 Git コマンドを起動するまでもない基本操作をサポート
-- Git CLI では面倒な、任意の複数ファイル操作は gitgit status のメニューで対応
-- texe と呼ばれる単純なテキストから任意の CLI を直接起動
+- 標準の Git コマンドでは面倒な、任意の複数ファイル操作は gitgit status のメニューで対応
+- texe と呼ばれる単純なテキストから任意の CLI を直接起動可能
 - 前作の mvc.el は Git 以外の VCS に対応するため複雑になり過ぎた反省から、 Git 専用に再設計
 
 
@@ -37,7 +37,7 @@ $ cp -av texe.el gitgit-*.el /YOUR-ELISP-PATH/
 
 gitgit status では `m` キーでマークしたファイルに対して、 Git コマンドを実行します。
 
-複雑な操作は `!` キーで起動する texe と呼ばれるバッファで Git コマンドを直接実行します(後述)。
+ここで操作できるのは、よく使うコマンドのみで、 push/pull や、その他複雑な操作は `!` キーで起動する texe と呼ばれるバッファで Git コマンドを直接実行します(後述)。
 
 
 ## gitgit status shortcuts
@@ -84,6 +84,13 @@ Texe のファイル実体は `~/.emacs.d/.gitgit.texe/` に置かれ、`texe-mo
 `texe-mode` では `\C-c\C-c` でカーソル行のコマンドを実行できます。但し、対応しているのはコマンドからの出力のみなので、対話的なコマンドは実行できません。
 
 コマンドは基本的には 1 行で記述しますが、下記のように `#@script-begin` と `#@script-end` で囲むことで複数行のコマンドを実行することも可能です。
+
+```rust
+#@script-begin
+#!/usr/bin/env rust-script
+println!("{:?}", std::env::args());
+#@script-end
+```
 
 ```perl
 #@script-begin
@@ -135,8 +142,6 @@ git --no-pager log -n 32 --stat-width=800
 
 special と呼ばれる特殊な行で、コマンド実行のふるまいを設定することができます。
 
-*仕様変更予定。*
-
 |関数名|説明|
 |--|--|
 |`(texe-special-buffer-name-suffix "suffix")`|出力バッファの suffix を指定|
@@ -147,24 +152,10 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 |`(texe-special-set-point-min)`|出力バッファの point を `(point-min)` に設定する|
 |`(texe-special-set-point-max)`|出力バッファの point を `(point-max)` に設定する|
 
-*下記に変更予定。*
-
-|関数名|説明|
-|--|--|
-|`suffix`: suffix|出力バッファの suffix を指定|
-|`suffix-time`: suffix|出力バッファの suffix と時刻を指定|
-|`major-mode`: mode|出力バッファの major-mode を指定|
-|`retain-window-focus`|出力バッファにフォーカスを移動しない|
-|`no-display-process-buffer`|出力バッファを表示しない|
-|`set-point: min`|出力バッファの point を `(point-min)` に設定する|
-|`set-point: max`|出力バッファの point を `(point-max)` に設定する|
-
 上記の他に、特殊なコマンドとして `@FORCE-YES` というものがあります。これを先頭に付加することでコマンド実行時の `yes-or-no-p` を省略します。
 
 
 ### 出力バッファの suffix を "-DIFF" にして major-mode を gitgit-diff-mode にする
-
-*仕様変更予定。*
 
 ```elisp
 #@(progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix "-DIFF"))

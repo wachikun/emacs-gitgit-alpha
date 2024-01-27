@@ -80,7 +80,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
         (eval-buffer))))
    ((string-match texe--special-comment-regexp-script
                   special)
-    (let* ((script-tmpfile (make-temp-name (concat texe--default-tmp-directory "/texe--script")))
+    (let* ((script-tmpfile (make-temp-name (concat texe--default-tmp-directory "/texe_script")))
            (args-alist (list (cons 'script-tmpfile script-tmpfile))))
       (with-temp-file script-tmpfile
         (insert command))

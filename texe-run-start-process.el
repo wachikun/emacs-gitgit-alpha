@@ -62,9 +62,8 @@
 (defun texe-run-start-process (background-p special command async-process-buffer-name
                                             args-alist &optional sentinel-callback buffer-erase-p
                                             reload-p)
-  (unless special
-    (setq special (texe--get-special-from-default-special-regexp-list
-                   command)))
+  (setq special (texe--apply-special-from-default-special-regexp-list-if-needed
+                 special command))
   (let ((special-result (texe--eval-special special reload-p)))
     (setq async-process-buffer-name (texe--modify-async-process-buffer-name-by-special
                                      special-result async-process-buffer-name))
@@ -104,18 +103,25 @@
                                             special-result async-process-buffer-name async-process-back-buffer-name
                                             args-alist)))))
 
-(defun texe--get-special-from-default-special-regexp-list (command)
-  (let (result)
-    (catch 'mapcar
-      (mapcar (lambda (pair)
-                (let ((default-special (nth 0 pair))
-                      (command-regexp (nth 1 pair)))
-                  (when (string-match command-regexp command)
-                    (setq result default-special)
-                    (throw 'mapcar nil))))
-              (seq-partition texe-mode-local-default-special-regexp-list
-                             2)))
-    result))
+(defun texe--apply-special-from-default-special-regexp-list-if-needed (special command)
+  (let ((special-force-yes-only-p (and (stringp special)
+                                       (string-match "^ *#@FORCE-YES *$" special))))
+    (if (or (not special)
+            special-force-yes-only-p)
+        (let (result)
+          (catch 'mapcar
+            (mapcar (lambda (pair)
+                      (let ((default-special (nth 0 pair))
+                            (command-regexp (nth 1 pair)))
+                        (when (string-match command-regexp command)
+                          (setq result default-special)
+                          (throw 'mapcar nil))))
+                    (seq-partition texe-mode-local-default-special-regexp-list
+                                   2)))
+          (if special-force-yes-only-p
+              (concat "FORCE-YES " result)
+            result))
+      special)))
 
 (defun texe--modify-async-process-buffer-name-by-special (special-result async-process-buffer-name)
   (cond

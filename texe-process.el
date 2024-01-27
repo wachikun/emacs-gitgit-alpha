@@ -27,9 +27,9 @@
 ;;; Code:
 
 (defconst texe--special-comment-regexp-elisp
-  "^#@elisp" "elisp")
+  "^#@\\(FORCE-YES *\\)?elisp" "elisp")
 (defconst texe--special-comment-regexp-script
-  "^#@script" "script")
+  "^#@\\(FORCE-YES *\\)?script" "script")
 (defconst texe--default-tmp-directory "/tmp")
 (defconst texe--process-mode-name " Texe Process")
 (defconst texe--process-back-buffer-suffix

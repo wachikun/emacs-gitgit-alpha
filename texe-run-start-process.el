@@ -103,6 +103,24 @@
                                             special-result async-process-buffer-name async-process-back-buffer-name
                                             args-alist)))))
 
+(defun texe-set-header-line-process-runnning ()
+  (setq header-line-format (propertize "PROCESS RUNNING" 'face 'texe--face-process-running-header-line)))
+
+(defun texe-set-header-line-process-terminated ()
+  (setq header-line-format (propertize "TERMINATED" 'face 'texe--face-process-running-header-line)))
+
+(defun texe-set-header-line-process-start ()
+  (setq header-line-format nil))
+
+(defun texe-set-header-line-process-success ()
+  (setq header-line-format nil))
+
+(defun texe-set-header-line-process-error (event)
+  (setq header-line-format (propertize (format "PROCESS ERROR event = %s"
+                                               (replace-regexp-in-string "[\r\n]+$" "" event))
+                                       'face
+                                       'texe--face-process-running-header-line)))
+
 (defun texe--apply-special-from-default-special-regexp-list-if-needed (special command)
   (let ((special-force-yes-only-p (and (stringp special)
                                        (string-match "^ *#@FORCE-YES *$" special))))
@@ -159,24 +177,6 @@
         (texe-process-make-local-variable))
       (setq buffer-read-only t))
     result-backup-point-alist))
-
-(defun texe-set-header-line-process-runnning ()
-  (setq header-line-format (propertize "PROCESS RUNNING" 'face 'texe--face-process-running-header-line)))
-
-(defun texe-set-header-line-process-terminated ()
-  (setq header-line-format (propertize "TERMINATED" 'face 'texe--face-process-running-header-line)))
-
-(defun texe-set-header-line-process-start ()
-  (setq header-line-format nil))
-
-(defun texe-set-header-line-process-success ()
-  (setq header-line-format nil))
-
-(defun texe-set-header-line-process-error (event)
-  (setq header-line-format (propertize (format "PROCESS ERROR event = %s"
-                                               (replace-regexp-in-string "[\r\n]+$" "" event))
-                                       'face
-                                       'texe--face-process-running-header-line)))
 
 (defun texe--setup-background-run-at-time (async-process-buffer-name async-process-back-buffer-name)
   (run-at-time texe--process-running-message-delay-second
@@ -319,7 +319,8 @@
           (funcall texe-process-local-sentinel-callback))))
     (cond
      ((string-match "^finished" event)
-      (texe-set-header-line-process-success))
+      (unless texe-process-local-donot-touch-header-on-success
+        (texe-set-header-line-process-success)))
      ((string-match "^exited abnormally with code"
                     event)
       (display-buffer (buffer-name))

@@ -52,11 +52,6 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
   "texe-process から texe buffer name を取得する"
   (cdr (assq 'i-texe-buffer-name texe-process-local-args-alist)))
 
-(defun texe--get-process-buffer-name (buffer-suffix)
-  (concat (buffer-name)
-          " "
-          buffer-suffix))
-
 (defun texe-get-process-back-buffer-name (buffer-name)
   (concat buffer-name " " texe--process-back-buffer-suffix))
 
@@ -112,27 +107,6 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                                   'texe--sentinel-callback
                                   buffer-erase-p))))))
 
-(defun texe--run-core (special command buffer-suffix buffer-erase-p)
-  (if special
-      (texe-run-core-special special command buffer-suffix
-                             buffer-erase-p)
-    (texe-run-start-process nil
-                            special
-                            command
-                            (texe--get-process-buffer-name buffer-suffix)
-                            (list (cons 'i-from-texe t))
-                            'texe--sentinel-callback
-                            buffer-erase-p)))
-
-(defun texe--sentinel-callback ()
-  "texe sentinel callback
-texe 実行後に実行される callback 。"
-  (run-hooks 'texe-sentinel-callback-hook)
-  (texe-update-point)
-  (texe-special-update-point texe-process-local-special-result)
-  ;; ここで mode が変わると buffer local 変数が消えることに注意
-  (texe-special-change-major-mode-if-match texe-process-local-special-result))
-
 (defun texe-special-change-major-mode-if-match (special-result)
   (let ((process-major-mode (cdr (assq 'texe-special-set-major-mode special-result))))
     (when process-major-mode
@@ -148,7 +122,8 @@ texe 実行後に実行される callback 。"
             texe-process-local-special-result texe-process-local-command
             texe-process-local-process texe-process-local-args-alist
             texe-process-local-sentinel-callback texe-process-local-run-last-buffer-point
-            texe-process-local-background-p)
+            texe-process-local-background-p
+            texe-process-local-donot-touch-header-on-success)
     nil))
 
 (defun texe-process-update-local-variable-list (variable-list)
@@ -162,7 +137,8 @@ texe 実行後に実行される callback 。"
     (setq texe-process-local-args-alist (nth 6 variable-list))
     (setq texe-process-local-sentinel-callback (nth 7 variable-list))
     (setq texe-process-local-run-last-buffer-point (nth 8 variable-list))
-    (setq texe-process-local-background-p (nth 9 variable-list))))
+    (setq texe-process-local-background-p (nth 9 variable-list))
+    (setq texe-process-local-donot-touch-header-on-success (nth 10 variable-list))))
 
 (defun texe-process-make-local-variable ()
   (set (make-local-variable 'texe-process-local-backup-point-alist)
@@ -184,6 +160,34 @@ texe 実行後に実行される callback 。"
   (set (make-local-variable 'texe-process-local-run-last-buffer-point)
        nil)
   (set (make-local-variable 'texe-process-local-background-p)
+       nil)
+  (set (make-local-variable 'texe-process-local-donot-touch-header-on-success)
        nil))
+
+(defun texe--get-process-buffer-name (buffer-suffix)
+  (concat (buffer-name)
+          " "
+          buffer-suffix))
+
+(defun texe--run-core (special command buffer-suffix buffer-erase-p)
+  (if special
+      (texe-run-core-special special command buffer-suffix
+                             buffer-erase-p)
+    (texe-run-start-process nil
+                            special
+                            command
+                            (texe--get-process-buffer-name buffer-suffix)
+                            (list (cons 'i-from-texe t))
+                            'texe--sentinel-callback
+                            buffer-erase-p)))
+
+(defun texe--sentinel-callback ()
+  "texe sentinel callback
+texe 実行後に実行される callback 。"
+  (run-hooks 'texe-sentinel-callback-hook)
+  (texe-update-point)
+  (texe-special-update-point texe-process-local-special-result)
+  ;; ここで mode が変わると buffer local 変数が消えることに注意
+  (texe-special-change-major-mode-if-match texe-process-local-special-result))
 
 (provide 'texe-process)

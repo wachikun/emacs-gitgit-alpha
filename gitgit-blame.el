@@ -67,8 +67,38 @@
             ("p" . gitgit-blame--previous-line)
             (" " . gitgit-blame--scroll-page-forward)
             ("=" . gitgit-blame--diff)
-            ("?" . gitgit-blame--show-hide-information))(set (make-local-variable 'gitgit-blame-local--view-type)
+            ("?" . gitgit-blame--show-hide-information)
+            ("\t" . gitgit-blame--show-hide-information))(set (make-local-variable 'gitgit-blame-local--view-type)
             'gitgit-view-type-show-all-information))
+
+(defun gitgit-blame-setup-buffer (&optional revision)
+  (let ((file-name (nth 0
+                        (cdr (assq 'file-list texe-process-local-args-alist))))
+        (call-texe-buffer-name (cdr (assq 'i-texe-buffer-name texe-process-local-args-alist))))
+    (setq texe-process-local-donot-touch-header-on-success t)
+    (setq buffer-read-only nil)
+    (gitgit-blame--move-information-text-to-overlay)
+    (gitgit-status--sentinel-callback-not-reload-status)
+    (gitgit-blame--change-major-mode-and-keep-blame-mode (lambda ()
+                                                           (set-visited-file-name (gitgit-blame-get-visited-file-name "blame"
+                                                                                                                      file-name revision))))
+    (gitgit-blame--update-buffer-invisibility-spec)
+    (let ((buffer-name (concat call-texe-buffer-name
+                               " "
+                               (buffer-name))))
+      (rename-buffer buffer-name))
+    (set-buffer-modified-p nil)
+    (setq buffer-read-only t)
+    (texe-set-point-min)))
+
+(defun gitgit-blame-get-visited-file-name (prefix file-name &optional revision)
+  (expand-file-name (format "%s.%s%s"
+                            prefix
+                            (if revision
+                                (concat revision ".")
+                              "")
+                            (replace-regexp-in-string "[ /\\]" "_" file-name))
+                    gitgit-temporary-file-directory-for-visited-file-name))
 
 (defun gitgit-blame--get-revision ()
   (save-excursion
@@ -107,15 +137,6 @@
             (match-string 1 after-string)
           (nth 0
                (cdr (assq 'file-list texe-process-local-args-alist))))))))
-
-(defun gitgit-blame-get-visited-file-name (prefix file-name &optional revision)
-  (expand-file-name (format "%s.%s%s"
-                            prefix
-                            (if revision
-                                (concat revision ".")
-                              "")
-                            (replace-regexp-in-string "[ /\\]" "_" file-name))
-                    gitgit-temporary-file-directory-for-visited-file-name))
 
 (defun gitgit-blame--move-information-text-to-overlay ()
   (save-excursion
@@ -168,25 +189,6 @@
     (gitgit-blame-mode)
     (gitgit-blame--update-header)
     (setq gitgit-blame-local--view-type backup-local--view-type)))
-
-(defun gitgit-blame-setup-buffer (&optional revision)
-  (let ((file-name (nth 0
-                        (cdr (assq 'file-list texe-process-local-args-alist))))
-        (call-texe-buffer-name (cdr (assq 'i-texe-buffer-name texe-process-local-args-alist))))
-    (setq buffer-read-only nil)
-    (gitgit-blame--move-information-text-to-overlay)
-    (gitgit-status--sentinel-callback-not-reload-status)
-    (gitgit-blame--change-major-mode-and-keep-blame-mode (lambda ()
-                                                           (set-visited-file-name (gitgit-blame-get-visited-file-name "blame"
-                                                                                                                      file-name revision))))
-    (gitgit-blame--update-buffer-invisibility-spec)
-    (let ((buffer-name (concat call-texe-buffer-name
-                               " "
-                               (buffer-name))))
-      (rename-buffer buffer-name))
-    (set-buffer-modified-p nil)
-    (setq buffer-read-only t)
-    (texe-set-point-min)))
 
 (defun gitgit-blame--run (command buffer-name-suffix sentinel-callback
                                   file-name)

@@ -24,33 +24,6 @@
 
 ;;; Commentary:
 
-(defun texe--comment (arg)
-  "texe--comment"
-  (interactive "*P")
-  (let ((special-command-list (texe--get-region-special-begin-and-command)) comment-start)
-    (if (and special-command-list
-             (listp special-command-list)
-             (string-match "elisp" (nth 0 special-command-list))
-             (not (string-match "#@elisp" (buffer-substring (line-beginning-position)
-                                                            (line-end-position)))))
-        (setq comment-start ";;")
-      (setq comment-start "#"))
-    (comment-dwim arg)))
-
-(defun texe--next-buffer ()
-  (interactive)
-  (let ((buffer-name (texe-get-next-buffer-name (texe--get-texe-buffer-list)
-                                                (buffer-name))))
-    (when (get-buffer buffer-name)
-      (switch-to-buffer buffer-name))))
-
-(defun texe--previous-buffer ()
-  (interactive)
-  (let ((buffer-name (texe-get-previous-buffer-name (texe--get-texe-buffer-list)
-                                                    (buffer-name))))
-    (when (get-buffer buffer-name)
-      (switch-to-buffer buffer-name))))
-
 (defun texe-rerun ()
   (interactive)
   (if texe-run-last-buffer
@@ -112,5 +85,32 @@
     (if (get-buffer buffer-name)
         (switch-to-buffer buffer-name)
       (message "texe buffer not found%s" texe-buffer-not-found-supplementary-message))))
+
+(defun texe--comment (arg)
+  "texe--comment"
+  (interactive "*P")
+  (let ((special-command-list (texe--get-region-special-begin-and-command)) comment-start)
+    (if (and special-command-list
+             (listp special-command-list)
+             (string-match "elisp" (nth 0 special-command-list))
+             (not (string-match "#@elisp" (buffer-substring (line-beginning-position)
+                                                            (line-end-position)))))
+        (setq comment-start ";;")
+      (setq comment-start "#"))
+    (comment-dwim arg)))
+
+(defun texe--next-buffer ()
+  (interactive)
+  (let ((buffer-name (texe-get-next-buffer-name (texe--get-texe-buffer-list)
+                                                (buffer-name))))
+    (when (get-buffer buffer-name)
+      (switch-to-buffer buffer-name))))
+
+(defun texe--previous-buffer ()
+  (interactive)
+  (let ((buffer-name (texe-get-previous-buffer-name (texe--get-texe-buffer-list)
+                                                    (buffer-name))))
+    (when (get-buffer buffer-name)
+      (switch-to-buffer buffer-name))))
 
 (provide 'texe-interactive)

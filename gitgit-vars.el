@@ -188,10 +188,10 @@ ls -l /tmp/$NAME.tar.gz
 ^[^ ]+ +pull
 
 (progn (texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-buffer-name-suffix \"-grep\"))
-^\\(grep\\|rg\\|hw\\|ag\\) 
+^\(.+?\)? *\(grep\|rg\|hw\|ag\) 
 
 (progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\"))
-^diff 
+^\(.+?\)? *diff 
 " texe-special-comment-special-regexp "-end
 
 

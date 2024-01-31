@@ -255,8 +255,9 @@ status 生成 (reload) 後に呼ばれる callback。"
 (defun gitgit--texe-sentinel-callback ()
   "texe sentinel callback
 texe 実行後に status を更新するための callback 。"
-  (with-current-buffer (texe-process-get-texe-buffer-name)
-    (gitgit-status-sentinel-callback-reload-status-from-texe)))
+  (when (get-buffer (texe-process-get-texe-buffer-name))
+    (with-current-buffer (texe-process-get-texe-buffer-name)
+      (gitgit-status-sentinel-callback-reload-status-from-texe))))
 
 (defun gitgit--setup-texe-mode ()
   (texe-mode)

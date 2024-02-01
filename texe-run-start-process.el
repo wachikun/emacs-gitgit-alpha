@@ -222,6 +222,9 @@
     (setq buffer-read-only nil)
     (erase-buffer)
     (setq buffer-read-only t)
+    (let ((command-append (cdr (assq 'texe-special-append-shell-command special-result))))
+      (when command-append
+        (setq command (concat command command-append))))
     (with-environment-variables (("PAGER" ""))
       (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist)))
              (process (start-process-shell-command current-async-process-buffer-name

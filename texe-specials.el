@@ -61,4 +61,8 @@
   (add-to-list 'tmp-special-local-result-alist
                (list 'texe-special-set-point-max)))
 
+(defun texe-special-append-shell-command (command)
+  (add-to-list 'tmp-special-local-result-alist
+               (cons 'texe-special-append-shell-command command)))
+
 (provide 'texe-specials)

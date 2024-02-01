@@ -197,6 +197,12 @@ commit/add/rm/restore など、実行後に status が変化する場合に呼び出す。
   (setq gitgit-status-local-ignore-reload t)
   (gitgit-status--reload-status))
 
+(defun gitgit-status--sentinel-callback-reload-status-kill-process-buffer ()
+  "gitgit-status $B用の reload sentinel callback
+commit/add/rm/restore など、実行後に status が変化する場合に呼び出す。"
+  (setq texe-process-local-buffer-kill-p t)
+  (gitgit-status--sentinel-callback-reload-status))
+
 (defun gitgit-status--sentinel-callback-not-reload-status ()
   "gitgit-status 用の reload しない sentinel callback
 diff/log など、実行後に status が変化しない場合に呼び出す。"

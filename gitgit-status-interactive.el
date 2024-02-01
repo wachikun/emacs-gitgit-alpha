@@ -163,7 +163,7 @@
   (let ((file-list (gitgit-status--get-mark-file-names-or-current-file-name
                     'gitgit-status--can-add)))
     (when file-list
-      (gitgit-status--run t "add" "add" 'gitgit-status--sentinel-callback-reload-status
+      (gitgit-status--run t "add" "add" 'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
                           file-list))))
 
 (defun gitgit-status--git-blame ()
@@ -189,7 +189,7 @@
   (let ((file-list (gitgit-status--get-mark-file-names-or-current-file-name
                     'gitgit-status--can-remove)))
     (when file-list
-      (gitgit-status--run t "rm" "remove" 'gitgit-status--sentinel-callback-reload-status
+      (gitgit-status--run t "rm" "remove" 'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
                           file-list))))
 
 (defun gitgit-status--git-diff-current-file (arg)
@@ -311,15 +311,15 @@
             (progn
               (when file-list-restore
                 (gitgit-status--run t "restore" "auto-revert-restore"
-                                    'gitgit-status--sentinel-callback-reload-status
+                                    'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
                                     file-list-restore))
               (when file-list-restore-staged
                 (gitgit-status--run t "restore --staged" "auto-revert-restore--staged"
-                                    'gitgit-status--sentinel-callback-reload-status
+                                    'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
                                     file-list-restore-staged))
               (when file-list-rm-cached
                 (gitgit-status--run t "rm --cached" "auto-revert-rm--cached"
-                                    'gitgit-status--sentinel-callback-reload-status
+                                    'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
                                     file-list-rm-cached)))
           (message "canceled!"))))))
 
@@ -338,7 +338,7 @@
     (setq file-list (append file-list
                             (list destination)))
     (if file-list
-        (gitgit-status--run t "mv" "mv" 'gitgit-status--sentinel-callback-reload-status
+        (gitgit-status--run t "mv" "mv" 'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
                             file-list)
       (message "file-name not found"))))
 

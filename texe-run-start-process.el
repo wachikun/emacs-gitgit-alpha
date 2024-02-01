@@ -320,7 +320,9 @@
     (cond
      ((string-match "^finished" event)
       (unless texe-process-local-donot-touch-header-on-success
-        (texe-set-header-line-process-success)))
+        (texe-set-header-line-process-success))
+      (when texe-process-local-buffer-kill-p
+        (kill-buffer)))
      ((string-match "^exited abnormally with code"
                     event)
       (display-buffer (buffer-name))

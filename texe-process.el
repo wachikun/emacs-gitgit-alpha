@@ -118,7 +118,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
 (defun texe-process-get-local-variable-list ()
   (if (boundp 'texe-process-local-backup-point-alist)
       (list texe-process-local-backup-point-alist
-            texe-process-local-buffer-erase-p texe-process-local-special
+            texe-process-local-buffer-erase-p texe-process-local-buffer-kill-p texe-process-local-special
             texe-process-local-special-result texe-process-local-command
             texe-process-local-process texe-process-local-args-alist
             texe-process-local-sentinel-callback texe-process-local-run-last-buffer-point
@@ -130,20 +130,23 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
   (when variable-list
     (setq texe-process-local-backup-point-alist (nth 0 variable-list))
     (setq texe-process-local-buffer-erase-p (nth 1 variable-list))
-    (setq texe-process-local-special (nth 2 variable-list))
-    (setq texe-process-local-special-result (nth 3 variable-list))
-    (setq texe-process-local-command (nth 4 variable-list))
-    (setq texe-process-local-process (nth 5 variable-list))
-    (setq texe-process-local-args-alist (nth 6 variable-list))
-    (setq texe-process-local-sentinel-callback (nth 7 variable-list))
-    (setq texe-process-local-run-last-buffer-point (nth 8 variable-list))
-    (setq texe-process-local-background-p (nth 9 variable-list))
-    (setq texe-process-local-donot-touch-header-on-success (nth 10 variable-list))))
+    (setq texe-process-local-buffer-kill-p (nth 2 variable-list))
+    (setq texe-process-local-special (nth 3 variable-list))
+    (setq texe-process-local-special-result (nth 4 variable-list))
+    (setq texe-process-local-command (nth 5 variable-list))
+    (setq texe-process-local-process (nth 6 variable-list))
+    (setq texe-process-local-args-alist (nth 7 variable-list))
+    (setq texe-process-local-sentinel-callback (nth 8 variable-list))
+    (setq texe-process-local-run-last-buffer-point (nth 9 variable-list))
+    (setq texe-process-local-background-p (nth 10 variable-list))
+    (setq texe-process-local-donot-touch-header-on-success (nth 11 variable-list))))
 
 (defun texe-process-make-local-variable ()
   (set (make-local-variable 'texe-process-local-backup-point-alist)
        nil)
   (set (make-local-variable 'texe-process-local-buffer-erase-p)
+       nil)
+  (set (make-local-variable 'texe-process-local-buffer-kill-p)
        nil)
   (set (make-local-variable 'texe-process-local-special)
        nil)

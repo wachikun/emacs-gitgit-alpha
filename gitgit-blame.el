@@ -75,7 +75,8 @@
   (let ((file-name (nth 0
                         (cdr (assq 'file-list texe-process-local-args-alist))))
         (call-texe-buffer-name (cdr (assq 'i-texe-buffer-name texe-process-local-args-alist))))
-    (setq texe-process-local-donot-touch-header-on-success t)
+    (setq texe-process-local-donot-touch-header-on-success
+          t)
     (setq buffer-read-only nil)
     (gitgit-blame--move-information-text-to-overlay)
     (gitgit-status--sentinel-callback-not-reload-status)

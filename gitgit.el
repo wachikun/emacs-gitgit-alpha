@@ -144,8 +144,7 @@
       (gitgit--get-branch-from-top-line))))
 
 (defun gitgit--create-buffer-name (prefix initial-directory)
-  (let (buffer-name-base
-        count)
+  (let (buffer-name-base count)
     (string-match "/\\([^/]+\\)/$" initial-directory)
     (setq buffer-name-base (match-string 1 initial-directory))
     (if (gethash initial-directory gitgit--initial-directory-hash)
@@ -164,10 +163,10 @@
             "*")))
 
 (defun gitgit--get-texe-full-path-name (initial-directory buffer-name)
-  (let ((cooked-alist
-         (mapcar (lambda (a)
-                   `(,(expand-file-name (car a)) . ,(cdr a)))
-                 gitgit-texe-alist)))
+  (let ((cooked-alist (mapcar (lambda (a)
+                                `(,(expand-file-name (car a))
+                                  . ,(cdr a)))
+                              gitgit-texe-alist)))
     (let ((texe-file (cdr (assoc initial-directory cooked-alist))))
       (if texe-file
           texe-file

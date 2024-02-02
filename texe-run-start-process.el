@@ -84,8 +84,7 @@
             (texe--setup-foreground-run-at-time async-process-buffer-name)))
         (texe--setup-process-buffer background-p special-result
                                     special command args-alist sentinel-callback
-                                    call-texe-buffer-name backup-point-alist buffer-erase-p
-                                    current-async-process-buffer-name)
+                                    call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
         (let ((run-last-buffer-point (point)))
           (when (assq 'i-from-texe args-alist)
@@ -216,7 +215,7 @@
 
 (defun texe--setup-process-buffer (background-p special-result special command
                                                 args-alist sentinel-callback call-texe-buffer-name
-                                                backup-point-alist buffer-erase-p current-async-process-buffer-name)
+                                                backup-point-alist current-async-process-buffer-name)
   (with-current-buffer (get-buffer-create current-async-process-buffer-name)
     (setq buffer-undo-list t)
     (setq buffer-read-only nil)
@@ -235,7 +234,6 @@
         (texe-process-make-local-variable)
         (setq texe-process-local-backup-point-alist
               backup-point-alist)
-        (setq texe-process-local-buffer-erase-p buffer-erase-p)
         (setq texe-process-local-special special)
         (setq texe-process-local-special-result special-result)
         (setq texe-process-local-command command)
@@ -293,10 +291,8 @@
            (source-min (point-min))
            (source-max (point-max))
            (destination-buffer-name (texe-get-process-buffer-name-from-back-buffer-name (buffer-name)))
-           (backup-point-alist (if (not texe-process-local-buffer-erase-p)
-                                   (with-current-buffer destination-buffer-name
-                                     (texe-get-point-alist))
-                                 nil))
+           (backup-point-alist (with-current-buffer destination-buffer-name
+                                 (texe-get-point-alist)))
            (copy-local-variable-list (texe-process-get-local-variable-list)))
       (if (and texe-process-local-background-p
                (get-buffer destination-buffer-name))

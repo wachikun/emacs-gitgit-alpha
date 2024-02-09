@@ -111,13 +111,13 @@ texe-process-local-backup-point-alist $B$,(B nil $B$J$i$P(B (point-min) $B$
     (beginning-of-line)
     (let ((current-buffer-point (point)) window-set-alist)
       ;; point-alist $B<hF@;~$K(B window $B$,B8:_$7$?>l9g$O(B window-information-list $B$+$iI|5"(B
-      (mapcar #'(lambda (window-information)
-                  (when (eq (window-buffer (nth 0 window-information)) (nth 3 window-information))
-                    (add-to-list 'window-set-alist
-                                 (cons (nth 0 window-information) t))
-                    (set-window-point (nth 0 window-information)
-                                      (texe--get-line-beginning-position (nth 1 window-information)))))
-              window-information-list)
+      (mapc #'(lambda (window-information)
+                (when (eq (window-buffer (nth 0 window-information)) (nth 3 window-information))
+                  (add-to-list 'window-set-alist
+                               (cons (nth 0 window-information) t))
+                  (set-window-point (nth 0 window-information)
+                                    (texe--get-line-beginning-position (nth 1 window-information)))))
+            window-information-list)
       ;; point-alist $B<hF@;~$K(B window $B$,B8:_$7$J$+$C$?(B($B8e$+$i(B window $B$rI=<($7$?$h$&$J(B)$B>l9g$O(B buffer point $B$GI|5"(B
       (mapcar #'(lambda (window)
                   (unless (assq window window-set-alist)

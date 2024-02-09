@@ -193,12 +193,12 @@
 
 (defun gitgit-blame--run (command buffer-name-suffix sentinel-callback
                                   file-name)
-  (let (special (args-alist (list (cons 'file-list (if file-name
-                                                       (list file-name)
-                                                     nil)))))
+  (let ((args-alist (list (cons 'file-list (if file-name
+                                               (list file-name)
+                                             nil)))))
     (with-current-buffer (texe-process-get-texe-buffer-name)
       (texe-run-start-process nil
-                              special
+                              nil
                               command
                               (concat (buffer-name)
                                       " "

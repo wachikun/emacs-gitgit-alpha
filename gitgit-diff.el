@@ -34,11 +34,14 @@
   diff-mode
   gitgit-diff-mode-name
   "Major mode for gitgit diff"
+  ;; diff-mode
+  (define-key diff-mode-shared-map "g" nil)
   (define-key gitgit-diff-mode-map "!" 'gitgit-switch-to-texe)
   (define-key gitgit-diff-mode-map "\C-c\C-v"
               'gitgit-switch-to-status)
-  (define-key diff-mode-shared-map "g" nil)
   (define-key gitgit-diff-mode-map "g" 'gitgit-diff--reload)
+  (define-key gitgit-diff-mode-map "\M-." 'gitgit-status--next-status-buffer)
+  (define-key gitgit-diff-mode-map "\M-," 'gitgit-status--previous-status-buffer)
   (gitgit-update-buffer-header-line (gitgit-get-current-branch)))
 
 (defun gitgit-diff--reload ()

@@ -79,6 +79,8 @@
   (define-key gitgit-log-mode-map "!" 'gitgit-switch-to-texe)
   (define-key gitgit-log-mode-map "\C-c\C-v"
               'gitgit-switch-to-status)
+  (define-key gitgit-log-mode-map "\M-." 'gitgit-status--next-status-buffer)
+  (define-key gitgit-log-mode-map "\M-," 'gitgit-status--previous-status-buffer)
   (setq buffer-read-only nil)
   (gitgit-update-buffer-header-line (gitgit-get-current-branch))
   (gitgit-log-update-faces)
@@ -109,12 +111,12 @@
 
 (defun gitgit-log--run (command buffer-name-suffix sentinel-callback
                                 file-name)
-  (let (special (args-alist (list (cons 'file-list (if file-name
-                                                       (list file-name)
-                                                     nil)))))
+  (let ((args-alist (list (cons 'file-list (if file-name
+                                               (list file-name)
+                                             nil)))))
     (with-current-buffer (texe-process-get-texe-buffer-name)
       (texe-run-start-process nil
-                              special
+                              nil
                               command
                               (concat (buffer-name)
                                       " "

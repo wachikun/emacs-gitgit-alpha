@@ -205,13 +205,15 @@
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
                             (get-process async-process-buffer-name))
-                   (texe--show-process-buffer-content (current-buffer)))))
+                   (with-current-buffer async-process-buffer-name
+                     (texe--show-process-buffer-content (current-buffer))))))
   (run-at-time texe--process-running-recenter-delay-second-second
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
                             (get-process async-process-buffer-name))
-                   (texe--show-process-buffer-content (current-buffer))))))
+                   (with-current-buffer async-process-buffer-name
+                     (texe--show-process-buffer-content (current-buffer)))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
                                                 args-alist sentinel-callback call-texe-buffer-name

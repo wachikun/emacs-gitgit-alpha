@@ -85,8 +85,7 @@
 (defvar texe-buffer-not-found-supplementary-message
   "" "texe buffer が見付からない場合の補足メッセージ")
 
-(defvar texe-run-last-buffer nil "")
-(defvar texe-run-last-force-yes-p nil "")
+(defvar texe-run-last-information nil "")
 
 (defvar texe-mode-map (make-sparse-keymap))
 (define-key texe-mode-map "\C-c\C-c" 'texe-run)
@@ -161,7 +160,7 @@
                              nil
                              t)
       (beginning-of-line)
-      (let (command (special-command-list (texe--get-region-special-begin-and-command)))
+      (let ((special-command-list (texe--get-region-special-begin-and-command)))
         (if (and special-command-list
                  (listp special-command-list))
             (let* ((command (replace-regexp-in-string "\n$"
@@ -194,42 +193,50 @@
 
 (defun texe--get-texe-buffer-list ()
   (let (texe-buffer-list)
-    (mapcar #'(lambda (buffer)
-                (with-current-buffer buffer
-                  (when (and (boundp 'texe-mode)
-                             (symbol-value 'texe-mode))
-                    (setq texe-buffer-list (append texe-buffer-list
-                                                   (list (buffer-name)))))))
-            (buffer-list))
+    (mapc #'(lambda (buffer)
+              (with-current-buffer buffer
+                (when (and (boundp 'texe-mode)
+                           (symbol-value 'texe-mode))
+                  (setq texe-buffer-list (append texe-buffer-list
+                                                 (list (buffer-name)))))))
+          (buffer-list))
     (sort texe-buffer-list 'string<)))
 
 (defun texe--get-window-information-list (buffer)
   "window-infomation-list を返す
 window-infomation-list は下記のような構造。
-'((window window-point0 window-start0 buffer-name0) (window1 window-point1 window-start1 buffer-name1)...)"
+\='((window window-point0 window-start0 buffer-name0)
+  (window1 window-point1 window-start1 buffer-name1)...)"
   (let (result)
-    (mapcar #'(lambda (window)
-                (setq result (append result
-                                     (list (list window
-                                                 (window-point window)
-                                                 (window-start window)
-                                                 buffer)))))
-            (get-buffer-window-list buffer))
+    (mapc #'(lambda (window)
+              (setq result (append result
+                                   (list (list window
+                                               (window-point window)
+                                               (window-start window)
+                                               buffer)))))
+          (get-buffer-window-list buffer))
     result))
 
 (defun texe--use-replace-buffer-contents-p (source-max)
-  "replace-buffer-contents は非常に遅いので、使用するのは下記条件を満たした場合のみ
+  "replace-buffer-contents は非常に遅いため、
+使用するのは下記条件を満たした場合のみ
 
 - window が非表示
-- source buffer と destination buffer の (point-max) の差が point-max-diff-threshold より小さい
+- source buffer と destination buffer の差が小さい
 
-そもそも point や window-point を復帰しているにも関わらず replace-buffer-contents が必要と
-なるのは「erase-buffer などで point を失なった非表示バッファが直後に表示される」という特殊な
-ケースのみ (他の操作を挟んでから非表示バッファを表示すると正しく復帰できる。 Emacs のバグ?)。
+「source buffer と destination buffer の差が小さい」とは、
+source buffer と destination buffer の (point-max) の差が
+point-max-diff-threshold より小さいということを意味する。
 
-point-max-diff-threshold はバッファの差分が大きいと処理時間がかかるであろうという事から。
-replace-buffer-contents の引数である程度制御できるはずだが、若干動作が怪しい上、あきらかに
-待ち時間が発生するため。"
+point や window-point を復帰しているにも関わらず replace-buffer-contents が
+必要となるのは、
+「erase-buffer などで point を失なった非表示バッファが直後に表示される」
+という特殊なケースのみで、他の操作を挟んでから非表示バッファを表示すると
+問題なく復帰できるため Emacs のバグかもしれない。
+
+本来は replace-buffer-contents の引数である程度制御できるはずだが、
+若干動作が怪しい上、あきらかに待ち時間が発生するため、
+point-max-diff-threshold によりバッファの差分を確認している。"
   (let ((point-max-diff-threshold 1000))
     (and (>= emacs-major-version 26)
          (not (get-buffer-window (current-buffer)))

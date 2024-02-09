@@ -53,7 +53,7 @@
                                  (let ((original-buffer (current-buffer)))
                                    (insert-file-contents file-name)
                                    (with-temp-buffer
-                                     (insert-buffer original-buffer)
+                                     (insert-buffer-substring original-buffer)
                                      (goto-char (point-min))
                                      (search-forward gitgit-texe-special-system-scripts)
                                      (beginning-of-line)

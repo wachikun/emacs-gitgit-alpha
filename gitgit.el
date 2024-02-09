@@ -164,8 +164,7 @@
 
 (defun gitgit--get-texe-full-path-name (initial-directory buffer-name)
   (let ((cooked-alist (mapcar (lambda (a)
-                                `(,(expand-file-name (car a))
-                                  . ,(cdr a)))
+                                (cons (expand-file-name (car a)) (cdr a)))
                               gitgit-texe-alist)))
     (let ((texe-file (cdr (assoc initial-directory cooked-alist))))
       (if texe-file
@@ -199,9 +198,7 @@
                              t)
       (forward-line 1)
       (beginning-of-line)
-      (let ((backup-buffer-read-only buffer-read-only)
-            (dir-regexp (concat "^"
-                                (expand-file-name default-directory))))
+      (let ((backup-buffer-read-only buffer-read-only))
         (setq buffer-read-only nil)
         (mapc #'(lambda (value)
                   (insert (concat (nth 1 value)
@@ -272,7 +269,7 @@ texe 実行後に status を更新するための callback 。"
                                                                                              args-alist
                                                                                              'gitgit--status-sentinel-callback))))
                                                      (cons (concat gitgit-texe-special-comment-setup-modified-files-elisp
-                                                                   "-begin") (lambda (special command)
+                                                                   "-begin") (lambda (_special command)
                                                                    (eval (car (read-from-string command))))))))
 
 (defun gitgit--get-branch-from-top-line ()

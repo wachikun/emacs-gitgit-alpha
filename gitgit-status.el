@@ -130,6 +130,8 @@
               'gitgit-status--next-status-buffer)
   (define-key gitgit-status-mode-map "\M-,"
               'gitgit-status--previous-status-buffer)
+  (define-key gitgit-status-mode-map (kbd "C-i") 'gitgit-status--next-line)
+  (define-key gitgit-status-mode-map (kbd "C-S-i") 'gitgit-status--previous-line)
   ;; for texe-mode
   (define-key texe-mode-map "\C-c\C-v" 'gitgit-status--view-status-from-texe-buffer)
   (define-key texe-mode-process-mode-map "\C-c\C-v"
@@ -162,7 +164,7 @@
 
 (defun gitgit-status-mark-hash (hash)
   (save-excursion
-    (maphash #'(lambda (key value)
+    (maphash #'(lambda (key _value)
                  (goto-char (point-min))
                  (when (gitgit-status--mark-re-search-forward key)
                    (gitgit-status--mark)))
@@ -177,7 +179,7 @@ texe $B<B9T8e$O(B status $B$,JQ2=$9$k2DG=@-$,$"$k$N$G!"K\(B callback $B$r8F
   (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
     (gitgit-status--reload-status)
     (texe-update-point)
-    (setq header-line-format "")))
+    (texe-set-header-line-process-success)))
 
 (defun gitgit-status-get-status-buffer-name (buffer-name)
   (concat (replace-regexp-in-string "\\(.+\\*\\) .+"
@@ -187,6 +189,11 @@ texe $B<B9T8e$O(B status $B$,JQ2=$9$k2DG=@-$,$"$k$N$G!"K\(B callback $B$r8F
 (defun gitgit-status-get-process-back-buffer-name (buffer-name)
   (texe-get-process-back-buffer-name (gitgit-status-get-status-buffer-name buffer-name)))
 
+(defun gitgit-status--header-reset-from-sentinel ()
+  (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
+    (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
+      (texe-set-header-line-process-success))))
+
 (defun gitgit-status--sentinel-callback-reload-status ()
   "gitgit-status $BMQ$N(B reload sentinel callback
 commit/add/rm/restore $B$J$I!"<B9T8e$K(B status $B$,JQ2=$9$k>l9g$K8F$S=P$9!#(B"
@@ -195,6 +202,7 @@ commit/add/rm/restore $B$J$I!"<B9T8e$K(B status $B$,JQ2=$9$k>l9g$K8F$S=P$9!#
   (texe-special-update-point texe-process-local-special-result)
   (texe-special-change-major-mode-if-match texe-process-local-special-result)
   (setq gitgit-status-local-ignore-reload t)
+  (gitgit-status--header-reset-from-sentinel)
   (gitgit-status--reload-status))
 
 (defun gitgit-status--sentinel-callback-reload-status-kill-process-buffer ()
@@ -209,7 +217,8 @@ diff/log $B$J$I!"<B9T8e$K(B status $B$,JQ2=$7$J$$>l9g$K8F$S=P$9!#(B"
   (texe-update-point)
   (texe-update-window-start texe-process-local-backup-point-alist)
   (texe-special-update-point texe-process-local-special-result)
-  (texe-special-change-major-mode-if-match texe-process-local-special-result))
+  (texe-special-change-major-mode-if-match texe-process-local-special-result)
+  (gitgit-status--header-reset-from-sentinel))
 
 (defun gitgit-status--get-command (search-special not-found)
   (save-excursion
@@ -224,6 +233,11 @@ diff/log $B$J$I!"<B9T8e$K(B status $B$,JQ2=$7$J$$>l9g$K8F$S=P$9!#(B"
 (defun gitgit-status--run-1 (no-display-process-buffer-p git-command buffer-name
                                                          sentinel-callback file-list command-filter
                                                          buffer-erase-p)
+  (run-at-time gitgit-status-process-running-message-delay-second
+               nil
+               (lambda ()
+                 (when (texe-process-running-p buffer-name)
+                   (texe-set-header-line-process-runnning))))
   (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
     (let* (special (search-special (concat "#@gitgit-git-" git-command))
                    (special-before (concat "#@elisp-before-gitgit-git-" git-command))

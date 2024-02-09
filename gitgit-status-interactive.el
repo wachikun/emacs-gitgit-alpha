@@ -59,7 +59,7 @@
 (defun gitgit-status--unmark-all ()
   (interactive)
   (save-excursion
-    (maphash #'(lambda (key value)
+    (maphash #'(lambda (key _value)
                  (goto-char (point-min))
                  (when (gitgit-status--mark-re-search-forward key)
                    (gitgit-status--unmark)))
@@ -389,7 +389,7 @@
 (defun gitgit-status--get-mark-file-names-or-current-file-name (can-do-function)
   (let (file-list)
     (if (> (hash-table-count gitgit-status-local-mark-hash) 0)
-        (maphash #'(lambda (key value)
+        (maphash #'(lambda (key _value)
                      (unless (gitgit-status--ignore-p key)
                        (let ((file-name (funcall can-do-function key)))
                          (when file-name

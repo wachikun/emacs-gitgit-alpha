@@ -26,14 +26,21 @@
 
 (defun texe-rerun ()
   (interactive)
-  (if texe-run-last-buffer
-      (let ((last-buffer-point texe-process-local-run-last-buffer-point))
-        (with-current-buffer texe-run-last-buffer
-          (save-excursion
-            (when last-buffer-point
-              (goto-char last-buffer-point))
-            (texe-run-internal t texe-run-last-force-yes-p))))
-    (message "texe-run buffer not found")))
+  (if texe-run-last-information
+      (let ((information texe-run-last-information))
+        (if (get-buffer (cdr (assq 'buffer-name information)))
+            (if (or (cdr (assq 'force-yes-p information))
+                    (yes-or-no-p (concat "run \""
+                                         (cdr (assq 'command information))
+                                         "\" ?")))
+                (with-current-buffer (cdr (assq 'buffer-name information))
+                  (texe--run-core (cdr (assq 'special information))
+                                  (cdr (assq 'command information))
+                                  "CSproc"
+                                  t))
+              (message "texe-run buffer not found"))
+          (message "texe-run buffer not found")))
+    (message "texe-run information not found")))
 
 (defun texe-run ()
   (interactive)
@@ -65,8 +72,10 @@
                 (yes-or-no-p (concat "run \"" command "\" ?")))
             (progn
               (when interactive-p
-                (setq texe-run-last-buffer (buffer-name))
-                (setq texe-run-last-force-yes-p force-yes-p))
+                (setq texe-run-last-information (list (cons 'buffer-name (buffer-name))
+                                                      (cons 'special special)
+                                                      (cons 'command command)
+                                                      (cons 'force-yes-p force-yes-p))))
               (texe--run-core special command "CSproc" t))
           (message "canceled!"))))))
 

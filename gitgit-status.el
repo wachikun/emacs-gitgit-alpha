@@ -176,10 +176,11 @@
 (defun gitgit-status-sentinel-callback-reload-status-from-texe ()
   "texe 用の reload sentinel callback
 texe 実行後は status が変化する可能性があるので、本 callback を呼び出して status を更新する。"
-  (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
-    (gitgit-status--reload-status)
-    (texe-update-point)
-    (texe-set-header-line-process-success)))
+  (when (get-buffer (gitgit-status-get-status-buffer-name (buffer-name)))
+    (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
+      (gitgit-status--reload-status)
+      (texe-update-point)
+      (texe-set-header-line-process-success))))
 
 (defun gitgit-status-get-status-buffer-name (buffer-name)
   (concat (replace-regexp-in-string "\\(.+\\*\\) .+"
@@ -239,7 +240,7 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
                  (when (texe-process-running-p buffer-name)
                    (texe-set-header-line-process-runnning))))
   (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
-    (let* (special (search-special (concat "#@gitgit-git-" git-command))
+    (let* (special (search-special (concat "#@gitgit-status-" git-command))
                    (special-before (concat "#@elisp-before-gitgit-git-" git-command))
                    (command-before (gitgit-status--get-command special-before
                                                                nil))

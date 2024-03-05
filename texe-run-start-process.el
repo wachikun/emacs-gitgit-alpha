@@ -57,13 +57,20 @@
 (defconst texe--process-running-recenter-delay-second-second
   2)
 
+(defconst texe--special-eval-lisp-code-regexp
+  "^\#?\@?[^(]*\\((.+\\)")
+
+(defconst texe--special-prefix-regexp
+  "^texe-special-")
+
 (defvar texe--processes 0)
 
 (defun texe-run-start-process (background-p special command async-process-buffer-name
                                             args-alist &optional sentinel-callback buffer-erase-p
                                             reload-p)
-  (setq special (texe--apply-special-from-default-special-regexp-list-if-needed
-                 special command))
+  (unless reload-p
+    (setq special (texe--apply-special-from-default-special-regexp-list-if-needed
+                   special command)))
   (let ((special-result (texe--eval-special special reload-p)))
     (setq async-process-buffer-name (texe--modify-async-process-buffer-name-by-special
                                      special-result async-process-buffer-name))
@@ -83,7 +90,7 @@
                                                   async-process-back-buffer-name)
             (texe--setup-foreground-run-at-time async-process-buffer-name)))
         (texe--setup-process-buffer background-p special-result
-                                    special command args-alist sentinel-callback
+                                    special command args-alist sentinel-callback reload-p
                                     call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
         (let ((run-last-buffer-point (point)))
@@ -121,24 +128,20 @@
                                        'texe--face-process-running-header-line)))
 
 (defun texe--apply-special-from-default-special-regexp-list-if-needed (special command)
-  (let ((special-force-yes-only-p (and (stringp special)
-                                       (string-match "^ *#@FORCE-YES *$" special))))
-    (if (or (not special)
-            special-force-yes-only-p)
-        (let (result)
-          (catch 'mapcar
-            (mapcar (lambda (pair)
-                      (let ((default-special (nth 0 pair))
-                            (command-regexp (nth 1 pair)))
-                        (when (string-match command-regexp command)
-                          (setq result default-special)
-                          (throw 'mapcar nil))))
-                    (seq-partition texe-mode-local-default-special-regexp-list
-                                   2)))
-          (if special-force-yes-only-p
-              (concat "FORCE-YES " result)
-            result))
-      special)))
+  (let ((special-alist (texe--eval-special special nil)))
+    (if (assq 'texe-special-ignore-default special-alist)
+        special
+      (let ((found-default-special ""))
+        (catch 'mapcar
+          (mapcar (lambda (pair)
+                    (let ((default-special (nth 0 pair))
+                          (command-regexp (nth 1 pair)))
+                      (when (string-match command-regexp command)
+                        (setq found-default-special default-special)
+                        (throw 'mapcar nil))))
+                  (seq-partition texe-mode-local-default-special-regexp-list
+                                 2)))
+        (concat special " " found-default-special)))))
 
 (defun texe--modify-async-process-buffer-name-by-special (special-result async-process-buffer-name)
   (cond
@@ -163,8 +166,8 @@
   (let (result-backup-point-alist)
     (when (get-buffer async-process-buffer-name)
       (with-current-buffer async-process-buffer-name
+        (setq result-backup-point-alist (texe-get-point-alist))
         (when buffer-erase-p
-          (setq result-backup-point-alist (texe-get-point-alist))
           (setq buffer-read-only nil)
           (erase-buffer)
           (setq buffer-read-only t))))
@@ -216,16 +219,17 @@
                      (texe--show-process-buffer-content (current-buffer)))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
-                                                args-alist sentinel-callback call-texe-buffer-name
+                                                args-alist sentinel-callback reload-p call-texe-buffer-name
                                                 backup-point-alist current-async-process-buffer-name)
   (with-current-buffer (get-buffer-create current-async-process-buffer-name)
     (setq buffer-undo-list t)
     (setq buffer-read-only nil)
     (erase-buffer)
     (setq buffer-read-only t)
-    (let ((command-append (cdr (assq 'texe-special-append-shell-command special-result))))
-      (when command-append
-        (setq command (concat command command-append))))
+    (unless reload-p
+      (let ((command-append (cdr (assq 'texe-special-append-shell-command special-result))))
+        (when command-append
+          (setq command (concat command command-append)))))
     (with-environment-variables (("PAGER" ""))
       (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist)))
              (process (start-process-shell-command current-async-process-buffer-name
@@ -273,16 +277,26 @@
        (t (pop-to-buffer async-process-buffer-name))))))
 
 (defun texe--eval-special (special reload-p)
-  (if special
-      (with-temp-buffer
-        (set (make-local-variable 'tmp-special-local-result-alist)
-             nil)
-        (set (make-local-variable 'tmp-special-local-reload-p)
-             reload-p)
-        (when (string-match "^\#?\@?[^(]*\\((.+\\)" special)
-          (eval (car (read-from-string (match-string 1 special)))))
-        tmp-special-local-result-alist)
-    nil))
+  (catch 'error
+    (if special
+        (with-temp-buffer
+          (set (make-local-variable 'tmp-special-local-result-alist)
+               nil)
+          (set (make-local-variable 'tmp-special-local-reload-p)
+               reload-p)
+          (when (string-match texe--special-eval-lisp-code-regexp special)
+            (let* ((start 0)
+                   (text (match-string 1 special))
+                   (text-length (length text)))
+              (while (< start text-length)
+                (unless
+                    (ignore-errors
+                      (let ((read-result (read-from-string text start)))
+                        (eval (car read-result))
+                        (setq start (cdr read-result))))
+                  (throw 'error tmp-special-local-result-alist)))))
+          tmp-special-local-result-alist)
+      nil)))
 
 (defun texe--process-sentinel (process event)
   (with-current-buffer (process-buffer process)

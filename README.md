@@ -75,9 +75,9 @@ gitgit status では `m` キーでマークしたファイルに対して、 Git
 
 コマンドを実行するための環境です。
 
-Texe のファイル実体は `~/.emacs.d/.gitgit.texe/` に置かれ、`texe-mode` と呼ばれるモードが設定されている、ただのテキストファイルです。
+Texe のファイル実体は `~/.emacs.d/.gitgit.texe/` に置かれ、`texe-mode` と呼ばれるモードが設定されている、テキストファイルです。
 
-通常の Shell で実行しないため、 History を汚染をしませんし、 History から消えてしまう心配もありません。
+コマンドを通常の Shell 環境から実行しないため、 History を汚染をしませんし、大切なコマンドが History から消えてしまう心配もありません。
 
 コマンドをお好みで並べておくことも可能ですので、定型処理にも強いという利点もあります。
 
@@ -128,10 +128,10 @@ gitgit status 自体も texe で設定します。
 
 ### 重いリポジトリ
 
-Chromium や Firefox のような重量級のリポジトリでは、デフォルトの `git --no-pager log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat` では log 表示が遅くなるため、 texe バッファで下記のような設定をおすすめします。
+Chromium や Firefox のような重量級のリポジトリでは、 default の `git --no-pager log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat` では log 表示が遅くなるため、 texe バッファで下記のような設定をおすすめします。
 
 ```elisp
-#@gitgit-git-log (progn (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min))
+#@gitgit-status-log (progn (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min))
 git --no-pager log -n 32 --stat-width=800
 ```
 
@@ -144,6 +144,7 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 
 |関数名|説明|
 |--|--|
+|`(texe-special-ignore-default)`|正規表現で指定される文字列を含むコマンドに対する default 設定を適用しない|
 |`(texe-special-buffer-name-suffix "suffix")`|出力バッファの suffix を指定|
 |`(texe-special-buffer-name-suffix-time "suffix")`|出力バッファの suffix と時刻を指定|
 |`(texe-special-set-major-mode 'major-mode-name)`|出力バッファの major-mode を指定|
@@ -151,13 +152,16 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 |`(texe-special-no-display-process-buffer)`|出力バッファを表示しない|
 |`(texe-special-set-point-min)`|出力バッファの point を `(point-min)` に設定する|
 |`(texe-special-set-point-max)`|出力バッファの point を `(point-max)` に設定する|
+|`(texe-special-append-shell-command)`|シェルコマンドの最後に引数を追加する|
 
 上記の他に、特殊なコマンドとして `@FORCE-YES` というものがあります。これを先頭に付加することでコマンド実行時の `yes-or-no-p` を省略します。
+
+(texe-special-ignore-default) が指定されない限り、正規表現で指定される文字列を含むコマンドに対して default の special を適用しようとします。ここで指定される正規表現はあえて緩くしてあるため、意図しない default 設定が適用されることがあります。
 
 
 ### 出力バッファの suffix を "-DIFF" にして major-mode を gitgit-diff-mode にする
 
 ```elisp
-#@(progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix "-DIFF"))
+#@(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix "-DIFF")
 git diff
 ```

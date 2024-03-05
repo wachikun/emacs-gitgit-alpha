@@ -221,7 +221,7 @@
     (if buffer
         (pop-to-buffer buffer)
       (with-current-buffer (texe-process-get-texe-buffer-name)
-        (setq command (gitgit-status--get-command "#@gitgit-git-blame"
+        (setq command (gitgit-status--get-command "#@gitgit-status-blame"
                                                   nil)))
       (if (and revision file-name command)
           (gitgit-blame--run (concat command " " revision " -- " file-name)
@@ -261,7 +261,7 @@
         (file-name (gitgit-blame--get-file-name))
         command)
     (with-current-buffer (texe-process-get-texe-buffer-name)
-      (setq command (gitgit-status--get-command "#@gitgit-git-diff"
+      (setq command (gitgit-status--get-command "#@gitgit-status-diff"
                                                 nil)))
     (if (and revision file-name command)
         (gitgit-blame--run (concat command " " revision "~.." revision
@@ -321,7 +321,7 @@
   (interactive)
   (let ((revision (gitgit-blame--get-revision)) command)
     (with-current-buffer (texe-process-get-texe-buffer-name)
-      (setq command (gitgit-status--get-command "#@gitgit-git-log"
+      (setq command (gitgit-status--get-command "#@gitgit-status-log"
                                                 nil)))
     (if revision
         (gitgit-blame--run (concat command " " revision)

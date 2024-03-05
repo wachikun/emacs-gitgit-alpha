@@ -123,7 +123,7 @@ ls -l /tmp/$NAME.tar.gz
 #     - (texe-special-set-point-min)
 #     - (texe-special-set-point-max)
 # (ex.
-# #@(progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\"))
+# #@(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\")
 
 
 
@@ -157,41 +157,41 @@ ls -l /tmp/$NAME.tar.gz
 # special 未指定時の挙動を eval される文字列と regexp で指定
 # (一括して設定するため、他とは異なる少し特殊な指定方法となっていることに注意)
 " texe-special-comment-special-regexp "-begin
-(progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\") (texe-special-keep-select-texe-buffer) (texe-special-set-point-min))
-^[^ ]+ +diff
+(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\") (texe-special-keep-select-texe-buffer) (texe-special-set-point-min)
+ ?diff
 
-(progn (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-buffer-name-suffix \"-log\") (texe-special-set-point-min))
-^[^ ]+ +log
+(texe-special-set-major-mode 'gitgit-log-mode) (texe-special-buffer-name-suffix \"-log\") (texe-special-set-point-min)
+ log
 
-(progn (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-buffer-name-suffix \"-blame\") (texe-special-set-point-min))
-^[^ ]+ +blame
+(texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-buffer-name-suffix \"-blame\") (texe-special-set-point-min)
+ blame
 
-(progn (texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-branch\"))
-^[^ ]+ +branch
+(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-branch\")
+ branch
 
-(progn (texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-commit\"))
-^[^ ]+ +commit
+(texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-commit\")
+ commit
 
-(progn (texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-checkout\"))
-^[^ ]+ +checkout
+(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-checkout\")
+ checkout
 
-(progn (texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-merge\"))
-^[^ ]+ +merge
+(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-switch\")
+ switch
 
-(progn (texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-rebase\"))
-^[^ ]+ +rebase
+(texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-merge\")
+ merge
 
-(progn (texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-push\"))
-^[^ ]+ +push
+(texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-rebase\")
+ rebase
 
-(progn (texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-pull\"))
-^[^ ]+ +pull
+(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-push\")
+ push
 
-(progn (texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-buffer-name-suffix \"-grep\"))
-^\\(.+?\\)? *\\(grep\\|rg\\|hw\\|ag\\) 
+(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-pull\")
+ pull
 
-(progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\"))
-^\\(.+?\\)? *diff 
+(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-buffer-name-suffix \"-grep\")
+ ?\\(grep\\|rg\\|hw\\|ag\\) 
 " texe-special-comment-special-regexp "-end
 
 
@@ -206,7 +206,7 @@ ls -l /tmp/$NAME.tar.gz
 # 実行された script の出力が status に反映される。
 # --short --branch option が必須。
 " gitgit-texe-special-comment-initialize-script
-                                                  "-begin
+                                                  "-begin (texe-special-ignore-default)
 git status --short --branch 2> /dev/null
 
 
@@ -333,26 +333,26 @@ git status --long
 
 # gitgit status から実行される command の動作を指定
 #
-# gitgit-git-[command] のように記述することで指定可能。
+# gitgit-status-[command] のように記述することで指定可能。
 
-#@gitgit-git-blame (progn (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-point-min))
+#@gitgit-status-blame (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-point-min) (texe-special-ignore-default)
 git blame '--date=format:%Y-%m-%d %H:%m' 2> /dev/null
 # 日時は gitgit で参照していないので形式は任意
 # ここでは横幅を取らない形で指定している。
 
 
-#@gitgit-git-log (progn (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min))
+#@gitgit-status-log (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min) (texe-special-ignore-default)
 git log -n 32 --stat-width=800 --graph --decorate=full --stat
 # git log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat
 # 大きなプロジェクトでは --graph などを外してしまうと高速
 # git log -n 32 --stat-width=800
 
 
-#@gitgit-git-diff (progn (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-point-min) (texe-special-keep-select-texe-buffer))
+#@gitgit-status-diff (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-point-min) (texe-special-keep-select-texe-buffer) (texe-special-ignore-default)
 git diff
 
 
-#@gitgit-git-commit (texe-special-keep-select-texe-buffer)
+#@gitgit-status-commit (texe-special-keep-select-texe-buffer) (texe-special-ignore-default)
 git commit
 "))
 

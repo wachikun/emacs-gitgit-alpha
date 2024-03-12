@@ -71,7 +71,8 @@
           (setq force-yes-p t))
         (if (or force-yes-p
                 (yes-or-no-p (concat "run \"" command "\" ?")))
-            (texe--run-core special command "CSproc" t force-yes-p)
+            (texe--run-core special command "CSproc" t
+                            force-yes-p)
           (message "canceled!"))))))
 
 (defun texe-process-mode-cancel-process ()

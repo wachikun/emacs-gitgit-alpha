@@ -27,7 +27,7 @@
 ;;; Code:
 
 (defun texe-special-ignore-default ()
-    (add-to-list 'tmp-special-local-result-alist
+  (add-to-list 'tmp-special-local-result-alist
                (list 'texe-special-ignore-default)))
 
 (defun texe-special-buffer-name-suffix (suffix)

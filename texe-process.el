@@ -62,7 +62,8 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                             ""
                             back-buffer-name))
 
-(defun texe-run-core-special (special command buffer-suffix buffer-erase-p force-yes-p)
+(defun texe-run-core-special (special command buffer-suffix buffer-erase-p
+                                      force-yes-p)
   (cond
    ((string-match texe--special-comment-regexp-elisp
                   special)
@@ -126,8 +127,8 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
             texe-process-local-special-result texe-process-local-command
             texe-process-local-process texe-process-local-args-alist
             texe-process-local-sentinel-callback texe-process-local-run-last-buffer-point
-            texe-process-local-information
-            texe-process-local-background-p texe-process-local-donot-touch-header-on-success)
+            texe-process-local-information texe-process-local-background-p
+            texe-process-local-donot-touch-header-on-success)
     nil))
 
 (defun texe-process-update-local-variable-list (variable-list)
@@ -188,7 +189,8 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
           " "
           buffer-suffix))
 
-(defun texe--run-core (special command buffer-suffix buffer-erase-p force-yes-p)
+(defun texe--run-core (special command buffer-suffix buffer-erase-p
+                               force-yes-p)
   (if special
       (texe-run-core-special special command buffer-suffix
                              buffer-erase-p force-yes-p)
@@ -198,7 +200,9 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                             (texe--get-process-buffer-name buffer-suffix)
                             (list (cons 'i-from-texe t))
                             'texe--sentinel-callback
-                            buffer-erase-p nil force-yes-p)))
+                            buffer-erase-p
+                            nil
+                            force-yes-p)))
 
 (defun texe--sentinel-callback ()
   "texe sentinel callback

@@ -60,15 +60,13 @@
 (defconst texe--special-eval-lisp-code-regexp
   "^\#?\@?[^(]*\\((.+\\)")
 
-(defconst texe--special-prefix-regexp
-  "^texe-special-")
+(defconst texe--special-prefix-regexp "^texe-special-")
 
 (defvar texe--processes 0)
 
 (defun texe-run-start-process (background-p special command async-process-buffer-name
                                             args-alist &optional sentinel-callback buffer-erase-p
-                                            reload-p
-                                            force-yes-p)
+                                            reload-p force-yes-p)
   (unless reload-p
     (setq special (texe--apply-special-from-default-special-regexp-list-if-needed
                    special command)))
@@ -91,8 +89,9 @@
                                                   async-process-back-buffer-name)
             (texe--setup-foreground-run-at-time async-process-buffer-name)))
         (texe--setup-process-buffer background-p special-result
-                                    special command args-alist sentinel-callback reload-p force-yes-p
-                                    call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
+                                    special command args-alist sentinel-callback
+                                    reload-p force-yes-p call-texe-buffer-name
+                                    backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
         (let ((run-last-buffer-point (point)))
           (when (assq 'i-from-texe args-alist)
@@ -220,8 +219,8 @@
                      (texe--show-process-buffer-content (current-buffer)))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
-                                                args-alist sentinel-callback reload-p force-yes-p call-texe-buffer-name
-                                                backup-point-alist current-async-process-buffer-name)
+                                                args-alist sentinel-callback reload-p force-yes-p
+                                                call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
   (with-current-buffer (get-buffer-create current-async-process-buffer-name)
     (setq buffer-undo-list t)
     (setq buffer-read-only nil)
@@ -289,16 +288,15 @@
                nil)
           (set (make-local-variable 'tmp-special-local-reload-p)
                reload-p)
-          (when (string-match texe--special-eval-lisp-code-regexp special)
+          (when (string-match texe--special-eval-lisp-code-regexp
+                              special)
             (let* ((start 0)
                    (text (match-string 1 special))
                    (text-length (length text)))
               (while (< start text-length)
-                (unless
-                    (ignore-errors
-                      (let ((read-result (read-from-string text start)))
-                        (eval (car read-result))
-                        (setq start (cdr read-result))))
+                (unless (ignore-errors (let ((read-result (read-from-string text start)))
+                                         (eval (car read-result))
+                                         (setq start (cdr read-result))))
                   (throw 'error tmp-special-local-result-alist)))))
           tmp-special-local-result-alist)
       nil)))

@@ -348,6 +348,17 @@ texe 実行後に status を更新するための callback 。"
     (gitgit--setup-run-at-time)))
 
 (defun gitgit--setup-after-second (texe-buffer-name)
+  (let (local-variable-found-p)
+    (with-current-buffer texe-buffer-name
+      (setq local-variable-found-p texe-mode-local-run-core-special-alist))
+    (if local-variable-found-p
+        (gitgit--setup-after-second-1 texe-buffer-name)
+      (with-current-buffer texe-buffer-name
+        (gitgit--setup-texe-mode))
+      (gitgit--setup-after-second-1 texe-buffer-name)
+      (message "REVERT DETECTED TEXE BUFFER"))))
+
+(defun gitgit--setup-after-second-1 (texe-buffer-name)
   (with-current-buffer texe-buffer-name
     (gitgit--run-initialize-scripts))
   (with-current-buffer (gitgit-status-get-status-buffer-name texe-buffer-name)

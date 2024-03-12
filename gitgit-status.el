@@ -270,7 +270,7 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
       (when command-filter
         (setq command (funcall command-filter command)))
       (texe-run-start-process nil special command
-                              buffer-name args-alist sentinel-callback buffer-erase-p))))
+                              buffer-name args-alist sentinel-callback buffer-erase-p nil t))))
 
 (defun gitgit-status--run (no-display-process-buffer-p git-command buffer-name-suffix
                                                        sentinel-callback &optional file-list command-filter)

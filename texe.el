@@ -85,8 +85,6 @@
 (defvar texe-buffer-not-found-supplementary-message
   "" "texe buffer が見付からない場合の補足メッセージ")
 
-(defvar texe-run-last-information nil "")
-
 (defvar texe-mode-map (make-sparse-keymap))
 (define-key texe-mode-map "\C-c\C-c" 'texe-run)
 (define-key texe-mode-map "\M-;" 'texe--comment)

@@ -67,7 +67,8 @@
 
 (defun texe-run-start-process (background-p special command async-process-buffer-name
                                             args-alist &optional sentinel-callback buffer-erase-p
-                                            reload-p)
+                                            reload-p
+                                            force-yes-p)
   (unless reload-p
     (setq special (texe--apply-special-from-default-special-regexp-list-if-needed
                    special command)))
@@ -90,7 +91,7 @@
                                                   async-process-back-buffer-name)
             (texe--setup-foreground-run-at-time async-process-buffer-name)))
         (texe--setup-process-buffer background-p special-result
-                                    special command args-alist sentinel-callback reload-p
+                                    special command args-alist sentinel-callback reload-p force-yes-p
                                     call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
         (let ((run-last-buffer-point (point)))
@@ -219,7 +220,7 @@
                      (texe--show-process-buffer-content (current-buffer)))))))
 
 (defun texe--setup-process-buffer (background-p special-result special command
-                                                args-alist sentinel-callback reload-p call-texe-buffer-name
+                                                args-alist sentinel-callback reload-p force-yes-p call-texe-buffer-name
                                                 backup-point-alist current-async-process-buffer-name)
   (with-current-buffer (get-buffer-create current-async-process-buffer-name)
     (setq buffer-undo-list t)
@@ -247,6 +248,10 @@
         (setq texe-process-local-args-alist args-alist)
         (setq texe-process-local-sentinel-callback
               sentinel-callback)
+        (setq texe-process-local-information (list (cons 'buffer-name (buffer-name))
+                                                   (cons 'special special)
+                                                   (cons 'command command)
+                                                   (cons 'force-yes-p force-yes-p)))
         (setq texe-process-local-background-p background-p)))
     (add-to-list 'texe-process-local-args-alist
                  (cons 'i-texe-buffer-name call-texe-buffer-name))))

@@ -26,18 +26,19 @@
 
 (defun texe-rerun ()
   (interactive)
-  (if texe-run-last-information
-      (let ((information texe-run-last-information))
+  (if texe-process-local-information
+      (let ((information texe-process-local-information))
         (if (get-buffer (cdr (assq 'buffer-name information)))
             (if (or (cdr (assq 'force-yes-p information))
                     (yes-or-no-p (concat "run \""
                                          (cdr (assq 'command information))
                                          "\" ?")))
-                (with-current-buffer (cdr (assq 'buffer-name information))
+                (with-current-buffer (texe-process-get-texe-buffer-name)
                   (texe--run-core (cdr (assq 'special information))
                                   (cdr (assq 'command information))
                                   "CSproc"
-                                  t))
+                                  t
+                                  (cdr (assq 'force-yes-p information))))
               (message "texe-run buffer not found"))
           (message "texe-run buffer not found")))
     (message "texe-run information not found")))
@@ -70,13 +71,7 @@
           (setq force-yes-p t))
         (if (or force-yes-p
                 (yes-or-no-p (concat "run \"" command "\" ?")))
-            (progn
-              (when interactive-p
-                (setq texe-run-last-information (list (cons 'buffer-name (buffer-name))
-                                                      (cons 'special special)
-                                                      (cons 'command command)
-                                                      (cons 'force-yes-p force-yes-p))))
-              (texe--run-core special command "CSproc" t))
+            (texe--run-core special command "CSproc" t force-yes-p)
           (message "canceled!"))))))
 
 (defun texe-process-mode-cancel-process ()

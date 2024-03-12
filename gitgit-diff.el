@@ -46,13 +46,19 @@
 
 (defun gitgit-diff--reload ()
   (interactive)
-  (texe-run-start-process nil
-                          texe-process-local-special
-                          texe-process-local-command
-                          (buffer-name)
-                          texe-process-local-args-alist
-                          texe-process-local-sentinel-callback
-                          nil
-                          t))
+  (let ((force-yes-p (cdr (assq 'force-yes-p texe-process-local-information))))
+    (when (or force-yes-p
+              (yes-or-no-p (concat "run \""
+                                   (cdr (assq 'command texe-process-local-information))
+                                   "\" ?")))
+      (texe-run-start-process nil
+                              texe-process-local-special
+                              texe-process-local-command
+                              (buffer-name)
+                              texe-process-local-args-alist
+                              texe-process-local-sentinel-callback
+                              nil
+                              t
+                              force-yes-p))))
 
 (provide 'gitgit-diff)

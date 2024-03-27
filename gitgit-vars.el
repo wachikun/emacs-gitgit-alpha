@@ -41,7 +41,7 @@
                                                    gitgit-texe-status-buffer-suffix
                                                    "$"))
 
-(defconst gitgit-texe-special-comment-initialize-script
+(defconst gitgit-texe-special-comment-status-initialize-script
   "#@gitgit-status-initialize-script")
 (defconst gitgit-texe-special-comment-setup-modified-files-elisp
   "#@gitgit-setup-modified-files-elisp")
@@ -136,7 +136,7 @@ ls -l /tmp/$NAME.tar.gz
 # #@gitgit- ではじまるコメントは gitgit が内部的に使用する
 #
 # 下記の一覧は必須。
-#     - " gitgit-texe-special-comment-initialize-script
+#     - " gitgit-texe-special-comment-status-initialize-script
                                                   "
 #     - " gitgit-texe-special-comment-end-of-git-status
                                                   "
@@ -205,7 +205,7 @@ ls -l /tmp/$NAME.tar.gz
 #
 # 実行された script の出力が status に反映される。
 # --short --branch option が必須。
-" gitgit-texe-special-comment-initialize-script
+" gitgit-texe-special-comment-status-initialize-script
                                                   "-begin (texe-special-ignore-default)
 git status --short --branch 2> /dev/null
 
@@ -300,7 +300,7 @@ date
 echo
 echo '# git status --long'
 git status --long
-" gitgit-texe-special-comment-initialize-script
+" gitgit-texe-special-comment-status-initialize-script
                                                   "-end
 
 
@@ -362,6 +362,42 @@ git commit
   nil "set-visited-file-name で特定の directory を必要とするため、
 temporary-file-directory とは別に userid ごとに用意しておく。
 (user ごとに分けておかないと permission 関連の問題が発生することがある)")
+
+(defface gitgit--face-git-default-directory '((((type x w32 mac ns)
+                                                (class color)
+                                                (background light))
+                                               (:foreground "gray20" :bold t))
+                                              (((type x w32 mac ns)
+                                                (class color)
+                                                (background dark))
+                                               (:foreground "gray30" :bold t)))
+  "branch"
+  :group 'gitgit-faces)
+
+(defface gitgit--face-git-branch '((((type x w32 mac ns)
+                                     (class color)
+                                     (background light))
+                                    (:foreground "gray20" :bold t))
+                                   (((type x w32 mac ns)
+                                     (class color)
+                                     (background dark))
+                                    (:foreground "gray30" :bold t)))
+  "branch"
+  :group 'gitgit-faces)
+
+(defface gitgit--face-git-branch-master '((((type x w32 mac ns)
+                                            (class color)
+                                            (background light))
+                                           (:foreground "red4" :bold t))
+                                          (((type x w32 mac ns)
+                                            (class color)
+                                            (background dark))
+                                           (:foreground "red2" :bold t)))
+  "branch master"
+  :group 'gitgit-faces)
+
+(defvar gitgit--initial-directory-hash (make-hash-table :test 'equal))
+(defvar gitgit--buffer-name-count-hash (make-hash-table :test 'equal))
 
 (defcustom gitgit-texe-alist nil "directory ごとに texe を
 \='((directory-a . texe-a) (directory-b . texe-b)) な alist で指定する。

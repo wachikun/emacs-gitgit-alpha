@@ -99,7 +99,7 @@
   nil
   gitgit-status--mode-name
   "Major mode for gitgit status"
-  (define-key gitgit-status-mode-map "!" 'texe-process-mode-texe)
+  (define-key gitgit-status-mode-map "!" 'texe-process-mode-switch-to-texe)
   (define-key gitgit-status-mode-map "+" 'gitgit-status--mkdir)
   (define-key gitgit-status-mode-map "c" 'gitgit-status--run-commit)
   (define-key gitgit-status-mode-map "e" 'gitgit-status--run-find-file)
@@ -241,9 +241,6 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
                    (texe-set-header-line-process-runnning))))
   (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
     (let* (special (search-special (concat "#@gitgit-status-" git-command))
-                   (special-before (concat "#@elisp-before-gitgit-git-" git-command))
-                   (command-before (gitgit-status--get-command special-before
-                                                               nil))
                    (command (gitgit-status--get-command search-special
                                                         gitgit-internal-git-command))
                    (args-alist (list (cons 'file-list file-list)
@@ -254,10 +251,6 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
                                  nil
                                  t)
           (setq special (texe-get-line))))
-      (when command-before
-        (texe-run-core-special special-before command-before
-                               "command-before")
-        nil)
       (when (string= command gitgit-internal-git-command)
         (setq command (concat command " " git-command)))
       (when file-list
@@ -270,8 +263,7 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
       (when command-filter
         (setq command (funcall command-filter command)))
       (texe-run-start-process nil special command
-                              buffer-name args-alist sentinel-callback buffer-erase-p
-                              nil t))))
+                              buffer-name args-alist sentinel-callback buffer-erase-p nil t))))
 
 (defun gitgit-status--run (no-display-process-buffer-p git-command buffer-name-suffix
                                                        sentinel-callback &optional file-list command-filter)

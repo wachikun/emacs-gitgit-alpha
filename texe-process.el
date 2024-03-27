@@ -62,8 +62,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                             ""
                             back-buffer-name))
 
-(defun texe-run-core-special (special command buffer-suffix buffer-erase-p
-                                      force-yes-p)
+(defun texe-run-with-scripts (special command buffer-suffix buffer-erase-p force-yes-p)
   (cond
    ((string-match texe--special-comment-regexp-elisp
                   special)
@@ -92,16 +91,17 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                               buffer-erase-p
                               nil
                               force-yes-p)))
-   (t (let ((found (catch 'found
+   (t (let ((status-initializer-found
+             (catch 'status-initializer-found
                      (mapc #'(lambda (regex-func)
                                (when (string-match (car regex-func) special)
                                  (funcall (cdr regex-func)
                                           special
                                           command)
-                                 (throw 'found t)))
+                                 (throw 'status-initializer-found t)))
                            texe-mode-local-run-core-special-alist)
                      nil)))
-        (unless found
+        (unless status-initializer-found
           (texe-run-start-process nil
                                   special
                                   command
@@ -127,8 +127,8 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
             texe-process-local-special-result texe-process-local-command
             texe-process-local-process texe-process-local-args-alist
             texe-process-local-sentinel-callback texe-process-local-run-last-buffer-point
-            texe-process-local-information texe-process-local-background-p
-            texe-process-local-donot-touch-header-on-success)
+            texe-process-local-information
+            texe-process-local-background-p texe-process-local-donot-touch-header-on-success)
     nil))
 
 (defun texe-process-update-local-variable-list (variable-list)
@@ -184,15 +184,41 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
   (set (make-local-variable 'texe-process-local-donot-touch-header-on-success)
        nil))
 
+(defun texe--run-internal (force-yes-p)
+  (catch 'error
+    (let (special command special-command-list)
+      (setq special-command-list (texe--get-region-special-begin-and-command))
+      (if special-command-list
+          (if (listp special-command-list)
+              (progn
+                (setq special (nth 0 special-command-list))
+                (setq command (nth 1 special-command-list)))
+            (message "illegal region")
+            (throw 'error t))
+        (setq special-command-list (texe--get-special-and-command))
+        (if special-command-list
+            (progn
+              (setq special (nth 0 special-command-list))
+              (setq command (nth 1 special-command-list)))
+          (setq command (texe-get-line))))
+      (if (and (not special)
+               (string-match "^[ \t]*#" command))
+          (message "comment line!")
+        (when (string-prefix-p "#@FORCE-YES" special)
+          (setq force-yes-p t))
+        (if (or force-yes-p
+                (yes-or-no-p (concat "run \"" command "\" ?")))
+            (texe--run-core special command "CSproc" t force-yes-p)
+          (message "canceled!"))))))
+
 (defun texe--get-process-buffer-name (buffer-suffix)
   (concat (buffer-name)
           " "
           buffer-suffix))
 
-(defun texe--run-core (special command buffer-suffix buffer-erase-p
-                               force-yes-p)
+(defun texe--run-core (special command buffer-suffix buffer-erase-p force-yes-p)
   (if special
-      (texe-run-core-special special command buffer-suffix
+      (texe-run-with-scripts special command buffer-suffix
                              buffer-erase-p force-yes-p)
     (texe-run-start-process nil
                             special
@@ -200,9 +226,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                             (texe--get-process-buffer-name buffer-suffix)
                             (list (cons 'i-from-texe t))
                             'texe--sentinel-callback
-                            buffer-erase-p
-                            nil
-                            force-yes-p)))
+                            buffer-erase-p nil force-yes-p)))
 
 (defun texe--sentinel-callback ()
   "texe sentinel callback

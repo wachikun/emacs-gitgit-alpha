@@ -60,18 +60,20 @@
 (defconst texe--special-eval-lisp-code-regexp
   "^\#?\@?[^(]*\\((.+\\)")
 
-(defconst texe--special-prefix-regexp "^texe-special-")
+(defconst texe--special-prefix-regexp
+  "^texe-special-")
 
 (defvar texe--processes 0)
 
 (defun texe-run-start-process (background-p special command async-process-buffer-name
                                             args-alist &optional sentinel-callback buffer-erase-p
-                                            reload-p force-yes-p)
+                                            reload-p
+                                            force-yes-p)
   (unless reload-p
-    (setq special (texe--apply-special-from-default-special-regexp-list-if-needed
+    (setq special (texe-l-apply-special-from-default-special-regexp-list-if-needed
                    special command)))
-  (let ((special-result (texe--eval-special special reload-p)))
-    (setq async-process-buffer-name (texe--modify-async-process-buffer-name-by-special
+  (let ((special-result (texe-l-eval-special special reload-p)))
+    (setq async-process-buffer-name (texe-l-modify-async-process-buffer-name-by-special
                                      special-result async-process-buffer-name))
     (let* ((call-texe-buffer-name (buffer-name)) backup-point-alist
            (async-process-back-buffer-name (texe-get-process-back-buffer-name async-process-buffer-name))
@@ -79,19 +81,18 @@
                                                 async-process-buffer-name)))
       (if (get-process current-async-process-buffer-name)
           (message "process running")
-        (setq backup-point-alist (texe--setup-async-process-buffer async-process-buffer-name
+        (setq backup-point-alist (texe-l-setup-async-process-buffer async-process-buffer-name
                                                                    buffer-erase-p args-alist))
         (when (and (not (cdr (assq 'no-display-process-buffer args-alist)))
                    (not (assq 'texe-special-ignore-process-running
                               special-result)))
           (if background-p
-              (texe--setup-background-run-at-time async-process-buffer-name
+              (texe-l-setup-background-run-at-time async-process-buffer-name
                                                   async-process-back-buffer-name)
-            (texe--setup-foreground-run-at-time async-process-buffer-name)))
-        (texe--setup-process-buffer background-p special-result
-                                    special command args-alist sentinel-callback
-                                    reload-p force-yes-p call-texe-buffer-name
-                                    backup-point-alist current-async-process-buffer-name)
+            (texe-l-setup-foreground-run-at-time async-process-buffer-name)))
+        (texe-l-setup-process-buffer background-p special-result
+                                    special command args-alist sentinel-callback reload-p force-yes-p
+                                    call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
         (let ((run-last-buffer-point (point)))
           (when (assq 'i-from-texe args-alist)
@@ -105,7 +106,7 @@
                     (setq texe-process-local-process copy-process)))))))
         (puthash current-async-process-buffer-name
                  t texe-process-running-p-hash)
-        (texe--display-async-process-buffer background-p
+        (texe-l-display-async-process-buffer background-p
                                             special-result async-process-buffer-name async-process-back-buffer-name
                                             args-alist)))))
 
@@ -127,8 +128,8 @@
                                        'face
                                        'texe--face-process-running-header-line)))
 
-(defun texe--apply-special-from-default-special-regexp-list-if-needed (special command)
-  (let ((special-alist (texe--eval-special special nil)))
+(defun texe-l-apply-special-from-default-special-regexp-list-if-needed (special command)
+  (let ((special-alist (texe-l-eval-special special nil)))
     (if (assq 'texe-special-ignore-default special-alist)
         special
       (let ((found-default-special ""))
@@ -143,7 +144,7 @@
                                  2)))
         (concat special " " found-default-special)))))
 
-(defun texe--modify-async-process-buffer-name-by-special (special-result async-process-buffer-name)
+(defun texe-l-modify-async-process-buffer-name-by-special (special-result async-process-buffer-name)
   (cond
    ((assq 'texe-special-buffer-name-suffix special-result)
     (setq async-process-buffer-name (concat async-process-buffer-name
@@ -161,7 +162,7 @@
                                             (format-time-string "%Y-%m-%d-%H:%M:%S"))))
    (t async-process-buffer-name)))
 
-(defun texe--setup-async-process-buffer (async-process-buffer-name buffer-erase-p
+(defun texe-l-setup-async-process-buffer (async-process-buffer-name buffer-erase-p
                                                                    args-alist)
   (let (result-backup-point-alist)
     (when (get-buffer async-process-buffer-name)
@@ -180,7 +181,7 @@
       (setq buffer-read-only t))
     result-backup-point-alist))
 
-(defun texe--setup-background-run-at-time (async-process-buffer-name async-process-back-buffer-name)
+(defun texe-l-setup-background-run-at-time (async-process-buffer-name async-process-back-buffer-name)
   (run-at-time texe--process-running-message-delay-second
                nil
                (lambda ()
@@ -194,7 +195,7 @@
                      (with-current-buffer async-process-back-buffer-name
                        (texe-set-header-line-process-runnning)))))))
 
-(defun texe--setup-foreground-run-at-time (async-process-buffer-name)
+(defun texe-l-setup-foreground-run-at-time (async-process-buffer-name)
   (run-at-time texe--process-running-message-delay-second
                nil
                (lambda ()
@@ -202,25 +203,25 @@
                             (get-process async-process-buffer-name))
                    (with-current-buffer async-process-buffer-name
                      (texe-set-header-line-process-runnning)
-                     (texe--show-process-buffer-content (current-buffer))))))
+                     (texe-l-show-process-buffer-content (current-buffer))))))
   (run-at-time texe--process-running-recenter-delay-second-first
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
                             (get-process async-process-buffer-name))
                    (with-current-buffer async-process-buffer-name
-                     (texe--show-process-buffer-content (current-buffer))))))
+                     (texe-l-show-process-buffer-content (current-buffer))))))
   (run-at-time texe--process-running-recenter-delay-second-second
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
                             (get-process async-process-buffer-name))
                    (with-current-buffer async-process-buffer-name
-                     (texe--show-process-buffer-content (current-buffer)))))))
+                     (texe-l-show-process-buffer-content (current-buffer)))))))
 
-(defun texe--setup-process-buffer (background-p special-result special command
-                                                args-alist sentinel-callback reload-p force-yes-p
-                                                call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
+(defun texe-l-setup-process-buffer (background-p special-result special command
+                                                args-alist sentinel-callback reload-p force-yes-p call-texe-buffer-name
+                                                backup-point-alist current-async-process-buffer-name)
   (with-current-buffer (get-buffer-create current-async-process-buffer-name)
     (setq buffer-undo-list t)
     (setq buffer-read-only nil)
@@ -235,7 +236,7 @@
              (process (start-process-shell-command current-async-process-buffer-name
                                                    current-async-process-buffer-name
                                                    (if script-tmpfile script-tmpfile command))))
-        (set-process-sentinel process 'texe--process-sentinel)
+        (set-process-sentinel process 'texe-l-process-sentinel)
         (texe-mode-process-mode)
         (texe-process-make-local-variable)
         (setq texe-process-local-backup-point-alist
@@ -255,7 +256,7 @@
     (add-to-list 'texe-process-local-args-alist
                  (cons 'i-texe-buffer-name call-texe-buffer-name))))
 
-(defun texe--display-async-process-buffer (background-p special-result async-process-buffer-name
+(defun texe-l-display-async-process-buffer (background-p special-result async-process-buffer-name
                                                         async-process-back-buffer-name args-alist)
   (if background-p
       (let ((back-buffer-window (get-buffer-window async-process-back-buffer-name)))
@@ -280,7 +281,7 @@
         (display-buffer async-process-buffer-name))
        (t (pop-to-buffer async-process-buffer-name))))))
 
-(defun texe--eval-special (special reload-p)
+(defun texe-l-eval-special (special reload-p)
   (catch 'error
     (if special
         (with-temp-buffer
@@ -288,51 +289,31 @@
                nil)
           (set (make-local-variable 'tmp-special-local-reload-p)
                reload-p)
-          (when (string-match texe--special-eval-lisp-code-regexp
-                              special)
+          (when (string-match texe--special-eval-lisp-code-regexp special)
             (let* ((start 0)
                    (text (match-string 1 special))
                    (text-length (length text)))
               (while (< start text-length)
-                (unless (ignore-errors (let ((read-result (read-from-string text start)))
-                                         (eval (car read-result))
-                                         (setq start (cdr read-result))))
+                (unless
+                    (ignore-errors
+                      (let ((read-result (read-from-string text start)))
+                        (eval (car read-result))
+                        (setq start (cdr read-result))))
                   (throw 'error tmp-special-local-result-alist)))))
           tmp-special-local-result-alist)
       nil)))
 
-(defun texe--process-sentinel (process event)
+(defun texe-l-process-sentinel (process event)
   (with-current-buffer (process-buffer process)
     (remhash (buffer-name)
              texe-process-running-p-hash)
     (setq texe--processes (1- texe--processes))
-    (let* ((source-buffer-name (buffer-name))
-           (source-min (point-min))
-           (source-max (point-max))
-           (destination-buffer-name (texe-get-process-buffer-name-from-back-buffer-name (buffer-name)))
-           (backup-point-alist (with-current-buffer destination-buffer-name
-                                 (texe-get-point-alist)))
-           (copy-local-variable-list (texe-process-get-local-variable-list)))
+    (let ((destination-buffer-name
+           (texe-get-process-buffer-name-from-back-buffer-name (buffer-name))))
       (if (and texe-process-local-background-p
                (get-buffer destination-buffer-name))
-          (with-current-buffer destination-buffer-name
-            (setq buffer-read-only nil)
-            (if (texe--use-replace-buffer-contents-p source-max)
-                (replace-buffer-contents source-buffer-name
-                                         1 1000)
-              (erase-buffer)
-              (insert-buffer-substring source-buffer-name
-                                       source-min source-max))
-            (setq buffer-read-only t)
-            (kill-buffer source-buffer-name)
-            (texe-process-make-local-variable)
-            (texe-process-update-local-variable-list copy-local-variable-list)
-            (when backup-point-alist
-              (setq texe-process-local-backup-point-alist
-                    backup-point-alist))
-            (when texe-process-local-sentinel-callback
-              (funcall texe-process-local-sentinel-callback)))
-        (texe--show-process-buffer-content (current-buffer))
+          (texe-l-process-sentinel-copy-background destination-buffer-name)
+        (texe-l-show-process-buffer-content (current-buffer))
         (when texe-process-local-sentinel-callback
           (funcall texe-process-local-sentinel-callback))))
     (cond
@@ -347,10 +328,61 @@
       (texe-set-header-line-process-error event))
      (t (message (concat "process error error:" event))))))
 
-(defun texe--show-process-buffer-content (buffer-name)
+(defun texe-l-process-sentinel-copy-background (destination-buffer-name)
+  (let ((source-buffer-name (buffer-name))
+        (source-min (point-min))
+        (source-max (point-max))
+        (copy-local-variable-list (texe-process-get-local-variable-list))
+        (backup-point-alist (with-current-buffer destination-buffer-name
+                              (texe-get-point-alist))))
+    (with-current-buffer destination-buffer-name
+      (setq buffer-read-only nil)
+      (if (texe-l-use-replace-buffer-contents-p source-max)
+          (replace-buffer-contents source-buffer-name
+                                   1 1000)
+        (erase-buffer)
+        (insert-buffer-substring source-buffer-name
+                                 source-min source-max))
+      (setq buffer-read-only t)
+      (kill-buffer source-buffer-name)
+      (texe-process-make-local-variable)
+      (texe-process-update-local-variable-list copy-local-variable-list)
+      (when backup-point-alist
+        (setq texe-process-local-backup-point-alist
+              backup-point-alist))
+      (when texe-process-local-sentinel-callback
+        (funcall texe-process-local-sentinel-callback)))))
+
+(defun texe-l-show-process-buffer-content (buffer-name)
   (let ((window (get-buffer-window buffer-name)))
     (when window
       (with-selected-window window
         (recenter)))))
+
+(defun texe-l-use-replace-buffer-contents-p (source-max)
+  "replace-buffer-contents は非常に遅いため、
+使用するのは下記条件を満たした場合のみ
+
+- window が非表示
+- source buffer と destination buffer の差が小さい
+
+「source buffer と destination buffer の差が小さい」とは、
+source buffer と destination buffer の (point-max) の差が
+point-max-diff-threshold より小さいということを意味する。
+
+point や window-point を復帰しているにも関わらず replace-buffer-contents が
+必要となるのは、
+「erase-buffer などで point を失なった非表示バッファが直後に表示される」
+という特殊なケースのみで、他の操作を挟んでから非表示バッファを表示すると
+問題なく復帰できるため Emacs のバグかもしれない。
+
+本来は replace-buffer-contents の引数である程度制御できるはずだが、
+若干動作が怪しい上、あきらかに待ち時間が発生するため、
+point-max-diff-threshold によりバッファの差分を確認している。"
+  (let ((point-max-diff-threshold 1000))
+    (and (>= emacs-major-version 26)
+         (not (get-buffer-window (current-buffer)))
+         (< (abs (- source-max
+                    (point-max))) point-max-diff-threshold))))
 
 (provide 'texe-run-start-process)

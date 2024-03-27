@@ -27,7 +27,7 @@
 (defun texe-get-point-alist ()
   (let ((line (texe-get-line))
         (point (point))
-        (window-information-list (texe--get-window-information-list (current-buffer))))
+        (window-information-list (texe-l-get-window-information-list (current-buffer))))
     (list (cons 'buffer (current-buffer))
           (cons 'line line)
           (cons 'point point)
@@ -68,7 +68,7 @@ texe-process-local-backup-point-alist $B$,(B nil $B$J$i$P(B (point-min) $B$
       (goto-char point)
       (mapcar #'(lambda (window)
                   (set-window-start window
-                                    (texe--get-window-start-point window point))
+                                    (texe-l-get-window-start-point window point))
                   (set-window-point window point))
               (get-buffer-window-list (current-buffer))))))
 
@@ -124,7 +124,7 @@ texe-process-local-backup-point-alist $B$,(B nil $B$J$i$P(B (point-min) $B$
                     (set-window-point window current-buffer-point)))
               (get-buffer-window-list (current-buffer))))))
 
-(defun texe--get-window-start-point (window point)
+(defun texe-l-get-window-start-point (window point)
   (with-current-buffer (window-buffer window)
     (save-excursion
       (goto-char point)
@@ -132,5 +132,20 @@ texe-process-local-backup-point-alist $B$,(B nil $B$J$i$P(B (point-min) $B$
       (forward-line (- (- (window-body-height window)
                           1)))
       (point))))
+
+(defun texe-l-get-window-information-list (buffer)
+  "window-infomation-list $B$rJV$9(B
+window-infomation-list $B$O2<5-$N$h$&$J9=B$!#(B
+\='((window window-point0 window-start0 buffer-name0)
+  (window1 window-point1 window-start1 buffer-name1)...)"
+  (let (result)
+    (mapc #'(lambda (window)
+              (setq result (append result
+                                   (list (list window
+                                               (window-point window)
+                                               (window-start window)
+                                               buffer)))))
+          (get-buffer-window-list buffer))
+    result))
 
 (provide 'texe-point)

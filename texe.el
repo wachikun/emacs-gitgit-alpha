@@ -39,67 +39,12 @@
 
 ;;; Code:
 
+(require 'texe-vars)
 (require 'texe-interactive)
 (require 'texe-run-start-process)
 (require 'texe-point)
 (require 'texe-process)
 (require 'texe-specials)
-
-(defface texe--face-special-comment '((((type x w32 mac ns)
-                                        (class color)
-                                        (background light))
-                                       (:foreground "gray20" :bold t
-                                                    :underline t))
-                                      (((type x w32 mac ns)
-                                        (class color)
-                                        (background dark))
-                                       (:foreground "gray30" :bold t
-                                                    :underline t)))
-  "special comment"
-  :group 'texe-faces)
-
-(defface texe--face-comment '((((type x w32 mac ns)
-                                (class color)
-                                (background light))
-                               (:foreground "gray20" :bold t))
-                              (((type x w32 mac ns)
-                                (class color)
-                                (background dark))
-                               (:foreground "gray30" :bold t)))
-  "comment"
-  :group 'texe-faces)
-
-
-;; minor-mode $B$J$N$G@hF,$N(B " " $B$OI,?\$G$"$k$3$H$KCm0U(B
-(defconst texe--mode-name " Texe")
-
-(defconst texe-special-comment-special-regexp
-  "#@texe-default-special-regexp" "")
-
-(defconst texe--special-comment-regexp-special-regexp (concat "^" texe-special-comment-special-regexp
-                                                              "-")
-  "")
-
-(defvar texe-process-running-p-hash (make-hash-table :test 'equal))
-
-(defvar texe-buffer-not-found-supplementary-message
-  "" "texe buffer $B$,8+IU$+$i$J$$>l9g$NJdB-%a%C%;!<%8(B")
-
-(defvar texe-mode-map (make-sparse-keymap))
-(define-key texe-mode-map "\C-c\C-c" 'texe-run)
-(define-key texe-mode-map "\M-;" 'texe--comment)
-(define-key texe-mode-map "\M-." 'texe--next-buffer)
-(define-key texe-mode-map "\M-," 'texe--previous-buffer)
-
-(defvar texe-mode-process-mode-map (make-sparse-keymap))
-(define-key texe-mode-process-mode-map "\C-g"
-            'texe-process-mode-cancel-process)
-(define-key texe-mode-process-mode-map "\C-c\C-k"
-            'texe-process-mode-cancel-process)
-(define-key texe-mode-process-mode-map "!"
-            'texe-process-mode-texe)
-(define-key texe-mode-process-mode-map "g"
-            'texe-rerun)
 
 (define-minor-mode texe-mode
   "Toggle Texe mode in the current buffer."
@@ -112,6 +57,7 @@
                           '(("^[ \t]*\\(#@.*\\)" 1 'texe--face-special-comment)
                             ("^[ \t]*\\(#[^@].*\\)" 1 'texe--face-comment)
                             ("^[ \t]*\\(;.*\\)" 1 'font-lock-comment-face)))
+  (texe-l-setup-default-special-regexp)
   (if texe-mode
       (use-local-map texe-mode-map)
     (use-local-map nil)))
@@ -150,30 +96,6 @@
              buffer-name-list)
       (nth previous-index buffer-name-list))))
 
-(defun texe-setup-default-special-regexp ()
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward (concat texe--special-comment-regexp-special-regexp
-                                     "begin")
-                             nil
-                             t)
-      (beginning-of-line)
-      (let ((special-command-list (texe--get-region-special-begin-and-command)))
-        (if (and special-command-list
-                 (listp special-command-list))
-            (let* ((command (replace-regexp-in-string "\n$"
-                                                      ""
-                                                      (nth 1 special-command-list)))
-                   (default-special-regexp-list (split-string command "\n")))
-              (if (= (% (length default-special-regexp-list)
-                        2) 0)
-                  (setq texe-mode-local-default-special-regexp-list
-                        default-special-regexp-list)
-                (message "illegal pair")
-                (throw 'error nil)))
-          (message "illegal region")
-          (throw 'error nil))))))
-
 (defun texe-get-current-line-command ()
   (catch 'error
     (let (command special-command-list)
@@ -188,58 +110,6 @@
             (setq command (nth 1 special-command-list))
           (setq command (texe-get-line))))
       command)))
-
-(defun texe--get-texe-buffer-list ()
-  (let (texe-buffer-list)
-    (mapc #'(lambda (buffer)
-              (with-current-buffer buffer
-                (when (and (boundp 'texe-mode)
-                           (symbol-value 'texe-mode))
-                  (setq texe-buffer-list (append texe-buffer-list
-                                                 (list (buffer-name)))))))
-          (buffer-list))
-    (sort texe-buffer-list 'string<)))
-
-(defun texe--get-window-information-list (buffer)
-  "window-infomation-list $B$rJV$9(B
-window-infomation-list $B$O2<5-$N$h$&$J9=B$!#(B
-\='((window window-point0 window-start0 buffer-name0)
-  (window1 window-point1 window-start1 buffer-name1)...)"
-  (let (result)
-    (mapc #'(lambda (window)
-              (setq result (append result
-                                   (list (list window
-                                               (window-point window)
-                                               (window-start window)
-                                               buffer)))))
-          (get-buffer-window-list buffer))
-    result))
-
-(defun texe--use-replace-buffer-contents-p (source-max)
-  "replace-buffer-contents $B$OHs>o$KCY$$$?$a!"(B
-$B;HMQ$9$k$N$O2<5->r7o$rK~$?$7$?>l9g$N$_(B
-
-- window $B$,HsI=<((B
-- source buffer $B$H(B destination buffer $B$N:9$,>.$5$$(B
-
-$B!V(Bsource buffer $B$H(B destination buffer $B$N:9$,>.$5$$!W$H$O!"(B
-source buffer $B$H(B destination buffer $B$N(B (point-max) $B$N:9$,(B
-point-max-diff-threshold $B$h$j>.$5$$$H$$$&$3$H$r0UL#$9$k!#(B
-
-point $B$d(B window-point $B$rI|5"$7$F$$$k$K$b4X$o$i$:(B replace-buffer-contents $B$,(B
-$BI,MW$H$J$k$N$O!"(B
-$B!V(Berase-buffer $B$J$I$G(B point $B$r<:$J$C$?HsI=<(%P%C%U%!$,D>8e$KI=<($5$l$k!W(B
-$B$H$$$&FC<l$J%1!<%9$N$_$G!"B>$NA`:n$r64$s$G$+$iHsI=<(%P%C%U%!$rI=<($9$k$H(B
-$BLdBj$J$/I|5"$G$-$k$?$a(B Emacs $B$N%P%0$+$b$7$l$J$$!#(B
-
-$BK\Mh$O(B replace-buffer-contents $B$N0z?t$G$"$kDxEY@)8f$G$-$k$O$:$@$,!"(B
-$B<c43F0:n$,2x$7$$>e!"$"$-$i$+$KBT$A;~4V$,H/@8$9$k$?$a!"(B
-point-max-diff-threshold $B$K$h$j%P%C%U%!$N:9J,$r3NG'$7$F$$$k!#(B"
-  (let ((point-max-diff-threshold 1000))
-    (and (>= emacs-major-version 26)
-         (not (get-buffer-window (current-buffer)))
-         (< (abs (- source-max
-                    (point-max))) point-max-diff-threshold))))
 
 (defun texe--get-region-special-begin-and-command ()
   "#@*-begin
@@ -296,5 +166,29 @@ nil $B$rJV$9!#C"$7!"(B #@* $B$,(B -begin $B$^$?$O(B -end $B$G=*$($F$$$?>l
                    (not (string-match ".-end$" special)))
           (setq command tmp)
           (list special command))))))
+
+(defun texe-l-setup-default-special-regexp ()
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward (concat texe--special-comment-regexp-special-regexp
+                                     "begin")
+                             nil
+                             t)
+      (beginning-of-line)
+      (let ((special-command-list (texe--get-region-special-begin-and-command)))
+        (if (and special-command-list
+                 (listp special-command-list))
+            (let* ((command (replace-regexp-in-string "\n$"
+                                                      ""
+                                                      (nth 1 special-command-list)))
+                   (default-special-regexp-list (split-string command "\n")))
+              (if (= (% (length default-special-regexp-list)
+                        2) 0)
+                  (setq texe-mode-local-default-special-regexp-list
+                        default-special-regexp-list)
+                (message "illegal pair")
+                (throw 'error nil)))
+          (message "illegal region")
+          (throw 'error nil))))))
 
 (provide 'texe)

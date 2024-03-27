@@ -43,37 +43,9 @@
           (message "texe-run buffer not found")))
     (message "texe-run information not found")))
 
-(defun texe-run ()
+(defun texe-run (&optional force-yes-p)
   (interactive)
-  (texe-run-internal t nil))
-
-(defun texe-run-internal (interactive-p force-yes-p)
-  (catch 'error
-    (let (special command special-command-list)
-      (setq special-command-list (texe--get-region-special-begin-and-command))
-      (if special-command-list
-          (if (listp special-command-list)
-              (progn
-                (setq special (nth 0 special-command-list))
-                (setq command (nth 1 special-command-list)))
-            (message "illegal region")
-            (throw 'error t))
-        (setq special-command-list (texe--get-special-and-command))
-        (if special-command-list
-            (progn
-              (setq special (nth 0 special-command-list))
-              (setq command (nth 1 special-command-list)))
-          (setq command (texe-get-line))))
-      (if (and (not special)
-               (string-match "^[ \t]*#" command))
-          (message "comment line!")
-        (when (string-prefix-p "#@FORCE-YES" special)
-          (setq force-yes-p t))
-        (if (or force-yes-p
-                (yes-or-no-p (concat "run \"" command "\" ?")))
-            (texe--run-core special command "CSproc" t
-                            force-yes-p)
-          (message "canceled!"))))))
+  (texe--run-internal force-yes-p))
 
 (defun texe-process-mode-cancel-process ()
   (interactive)
@@ -84,7 +56,7 @@
     (texe-set-header-line-process-terminated)
     (message "PROCESS TERMINATED")))
 
-(defun texe-process-mode-texe ()
+(defun texe-process-mode-switch-to-texe ()
   (interactive)
   (let ((buffer-name (texe-process-get-texe-buffer-name)))
     (if (get-buffer buffer-name)
@@ -106,16 +78,27 @@
 
 (defun texe--next-buffer ()
   (interactive)
-  (let ((buffer-name (texe-get-next-buffer-name (texe--get-texe-buffer-list)
+  (let ((buffer-name (texe-get-next-buffer-name (texe-l-get-texe-buffer-list)
                                                 (buffer-name))))
     (when (get-buffer buffer-name)
       (switch-to-buffer buffer-name))))
 
 (defun texe--previous-buffer ()
   (interactive)
-  (let ((buffer-name (texe-get-previous-buffer-name (texe--get-texe-buffer-list)
+  (let ((buffer-name (texe-get-previous-buffer-name (texe-l-get-texe-buffer-list)
                                                     (buffer-name))))
     (when (get-buffer buffer-name)
       (switch-to-buffer buffer-name))))
+
+(defun texe-l-get-texe-buffer-list ()
+  (let (texe-buffer-list)
+    (mapc #'(lambda (buffer)
+              (with-current-buffer buffer
+                (when (and (boundp 'texe-mode)
+                           (symbol-value 'texe-mode))
+                  (setq texe-buffer-list (append texe-buffer-list
+                                                 (list (buffer-name)))))))
+          (buffer-list))
+    (sort texe-buffer-list 'string<)))
 
 (provide 'texe-interactive)

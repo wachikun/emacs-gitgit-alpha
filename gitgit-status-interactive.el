@@ -425,6 +425,7 @@
     (insert (shell-command-to-string (concat gitgit-internal-git-command " log -n 3")))
     (gitgit-log-update-faces)
     (gitgit-log-mode)
+    (define-key gitgit-log-mode-map "g" 'recenter)
     (setq buffer-read-only t)
     (goto-char (point-min))
     (display-buffer buffer-name)))

@@ -145,6 +145,7 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 |関数名|説明|
 |--|--|
 |`(texe-special-ignore-default)`|正規表現で指定される文字列を含むコマンドに対する default 設定を適用しない|
+|`(texe-special-ignore-callback)`|texe 実行後の callback を無視する|
 |`(texe-special-buffer-name-suffix "suffix")`|出力バッファの suffix を指定|
 |`(texe-special-buffer-name-suffix-time "suffix")`|出力バッファの suffix と時刻を指定|
 |`(texe-special-set-major-mode 'major-mode-name)`|出力バッファの major-mode を指定|
@@ -153,6 +154,7 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 |`(texe-special-set-point-min)`|出力バッファの point を `(point-min)` に設定する|
 |`(texe-special-set-point-max)`|出力バッファの point を `(point-max)` に設定する|
 |`(texe-special-append-shell-command)`|シェルコマンドの最後に引数を追加する|
+|`(texe-special-reload-p)`|リロードされた場合に t を返す|
 
 上記の他に、特殊なコマンドとして `@FORCE-YES` というものがあります。これを先頭に付加することでコマンド実行時の `yes-or-no-p` を省略します。
 

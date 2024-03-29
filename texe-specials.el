@@ -69,4 +69,11 @@
   (add-to-list 'tmp-special-local-result-alist
                (cons 'texe-special-append-shell-command command)))
 
+(defun texe-special-ignore-callback ()
+  (add-to-list 'tmp-special-local-result-alist
+               (list 'texe-special-ignore-callback)))
+
+(defun texe-special-reload-p ()
+  tmp-special-local-reload-p)
+
 (provide 'texe-specials)

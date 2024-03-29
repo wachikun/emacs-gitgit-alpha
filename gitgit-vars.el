@@ -157,10 +157,10 @@ ls -l /tmp/$NAME.tar.gz
 # special 未指定時の挙動を eval される文字列と regexp で指定
 # (一括して設定するため、他とは異なる少し特殊な指定方法となっていることに注意)
 " texe-special-comment-special-regexp "-begin
-(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\") (texe-special-keep-select-texe-buffer) (unless tmp-special-local-reload-p (texe-special-set-point-min))
+(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\") (texe-special-keep-select-texe-buffer) (unless (texe-special-reload-p) (texe-special-set-point-min))
  ?diff
 
-(texe-special-set-major-mode 'gitgit-log-mode) (texe-special-buffer-name-suffix \"-log\") (unless tmp-special-local-reload-p (texe-special-set-point-min))
+(texe-special-set-major-mode 'gitgit-log-mode) (texe-special-buffer-name-suffix \"-log\") (unless (texe-special-reload-p) (texe-special-set-point-min))
  log
 
 (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-buffer-name-suffix \"-blame\") (texe-special-set-point-min)
@@ -190,7 +190,7 @@ ls -l /tmp/$NAME.tar.gz
 (texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-pull\")
  pull
 
-(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-buffer-name-suffix \"-grep\") (unless tmp-special-local-reload-p (texe-special-set-point-min))
+(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-buffer-name-suffix \"-grep\") (unless (texe-special-reload-p) (texe-special-set-point-min))
  ?\\(grep\\|rg\\|hw\\|ag\\) 
 " texe-special-comment-special-regexp "-end
 
@@ -341,14 +341,14 @@ git blame '--date=format:%Y-%m-%d %H:%m' 2> /dev/null
 # ここでは横幅を取らない形で指定している。
 
 
-#@gitgit-status-log (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min) (texe-special-ignore-default) (unless tmp-special-local-reload-p (texe-special-set-point-min))
+#@gitgit-status-log (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min) (texe-special-ignore-default) (unless (texe-special-reload-p) (texe-special-set-point-min))
 git log -n 32 --stat-width=800 --graph --decorate=full --stat
 # git log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat
 # 大きなプロジェクトでは --graph などを外してしまうと高速
 # git log -n 32 --stat-width=800
 
 
-#@gitgit-status-diff (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-keep-select-texe-buffer) (texe-special-ignore-default) (unless tmp-special-local-reload-p (texe-special-set-point-min))
+#@gitgit-status-diff (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-keep-select-texe-buffer) (texe-special-ignore-default) (unless (texe-special-reload-p) (texe-special-set-point-min))
 git diff
 
 

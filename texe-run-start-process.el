@@ -126,13 +126,27 @@
 
 (defun texe-set-header-line-process-time (base)
   (setq header-line-format (format "%s %s - %s"
-                                   (format "%s %f sec."
+                                   (format "%s %s"
                                            base
-                                           (float-time (time-subtract (current-time)
-                                                                      (cdr (assq 'start-time texe-process-local-information)))))
+                                           (texe-sec-to-hms (float-time (time-subtract (current-time)
+                                                                                       (cdr (assq 'start-time texe-process-local-information))))))
                                    (format-time-string "%Y-%m-%d %H:%M:%S"
                                                        (cdr (assq 'start-time texe-process-local-information)))
                                    (format-time-string "%Y-%m-%d %H:%M:%S"))))
+
+(defun texe-sec-to-hms (sec)
+  (let ((tmp ""))
+    (when (>= sec 3600)
+      (let ((hour (truncate (/ sec 3600))))
+        (setq sec (- sec
+                     (* hour 3600)))
+        (setq tmp (format "%d hour " hour))))
+    (when (>= sec 60)
+      (let ((min (truncate (/ sec 60))))
+        (setq sec (- sec
+                     (* min 60)))
+        (setq tmp (format "%s%d min. " tmp min))))
+    (format "%s%f sec." tmp sec)))
 
 (defun texe-l-apply-special-from-default-special-regexp-list-if-needed (special command)
   (let ((special-alist (texe-l-eval-special special nil)))

@@ -235,8 +235,11 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
 (defun texe--sentinel-callback ()
   "texe sentinel callback
 texe 実行後に実行される callback 。"
-  (unless (assq 'texe-special-ignore-callback texe-process-local-special-result)
-    (run-hooks 'texe-sentinel-callback-hook))
+  (let ((callback-function (cdr (assq 'texe-special-callback-function texe-process-local-special-result))))
+    (unless (assq 'texe-special-ignore-callback texe-process-local-special-result)
+      (run-hooks 'texe-sentinel-callback-hook))
+    (when callback-function
+      (funcall callback-function)))
   (texe-update-point)
   (texe-special-update-point texe-process-local-special-result)
   ;; ここで mode が変わると buffer local 変数が消えることに注意

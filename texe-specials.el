@@ -73,6 +73,10 @@
   (add-to-list 'tmp-special-local-result-alist
                (list 'texe-special-ignore-callback)))
 
+(defun texe-special-set-callback (callback-function)
+  (add-to-list 'tmp-special-local-result-alist
+               (cons 'texe-special-callback-function callback-function)))
+
 (defun texe-special-reload-p ()
   tmp-special-local-reload-p)
 

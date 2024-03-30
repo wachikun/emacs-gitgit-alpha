@@ -146,6 +146,7 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 |--|--|
 |`(texe-special-ignore-default)`|正規表現で指定される文字列を含むコマンドに対する default 設定を適用しない|
 |`(texe-special-ignore-callback)`|texe 実行後の callback を無視する|
+|`(texe-special-set-callback)`|texe 実行後の callback を設定|
 |`(texe-special-buffer-name-suffix "suffix")`|出力バッファの suffix を指定|
 |`(texe-special-buffer-name-suffix-time "suffix")`|出力バッファの suffix と時刻を指定|
 |`(texe-special-set-major-mode 'major-mode-name)`|出力バッファの major-mode を指定|

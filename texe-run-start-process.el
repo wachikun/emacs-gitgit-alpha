@@ -93,10 +93,11 @@
                                      sentinel-callback reload-p force-yes-p call-texe-buffer-name
                                      backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
+        (with-current-buffer (get-buffer-create current-async-process-buffer-name)
+          (texe-set-header-line-process-start))
         (let ((run-last-buffer-point (point)))
           (when (assq 'i-from-texe args-alist)
             (with-current-buffer (get-buffer-create current-async-process-buffer-name)
-              (texe-set-header-line-process-start)
               (setq texe-process-local-run-last-buffer-point
                     run-last-buffer-point)
               (when background-p
@@ -109,23 +110,29 @@
                                              special-result async-process-buffer-name async-process-back-buffer-name
                                              args-alist)))))
 
-(defun texe-set-header-line-process-runnning ()
-  (setq header-line-format (propertize "PROCESS RUNNING" 'face 'texe--face-process-running-header-line)))
-
 (defun texe-set-header-line-process-terminated ()
-  (setq header-line-format (propertize "TERMINATED" 'face 'texe--face-process-running-header-line)))
+  (texe-set-header-line-process-time "TERMINATED"))
 
 (defun texe-set-header-line-process-start ()
-  (setq header-line-format nil))
+  (setq header-line-format (concat "PROCESS START "
+                                   (format-time-string "%Y-%m-%d %H:%M:%S"))))
 
 (defun texe-set-header-line-process-success ()
-  (setq header-line-format nil))
+  (texe-set-header-line-process-time "DONE"))
 
 (defun texe-set-header-line-process-error (event)
-  (setq header-line-format (propertize (format "PROCESS ERROR event = %s"
-                                               (replace-regexp-in-string "[\r\n]+$" "" event))
-                                       'face
-                                       'texe--face-process-running-header-line)))
+  (texe-set-header-line-process-time (concat "PROCESS ERROR event = "
+                                             (replace-regexp-in-string "[\r\n]+$" "" event))))
+
+(defun texe-set-header-line-process-time (base)
+  (setq header-line-format (format "%s %s - %s"
+                                   (format "%s %f sec."
+                                           base
+                                           (float-time (time-subtract (current-time)
+                                                                      (cdr (assq 'start-time texe-process-local-information)))))
+                                   (format-time-string "%Y-%m-%d %H:%M:%S"
+                                                       (cdr (assq 'start-time texe-process-local-information)))
+                                   (format-time-string "%Y-%m-%d %H:%M:%S"))))
 
 (defun texe-l-apply-special-from-default-special-regexp-list-if-needed (special command)
   (let ((special-alist (texe-l-eval-special special nil)))
@@ -189,28 +196,18 @@
                    (let ((window (get-buffer-window async-process-buffer-name)))
                      (if window
                          (set-window-buffer window async-process-back-buffer-name)
-                       (switch-to-buffer async-process-back-buffer-name)))
-                   (when (get-process async-process-back-buffer-name)
-                     (with-current-buffer async-process-back-buffer-name
-                       (texe-set-header-line-process-runnning)))))))
+                       (switch-to-buffer async-process-back-buffer-name)))))))
 
 (defun texe-l-setup-foreground-run-at-time (async-process-buffer-name)
-  (run-at-time texe--process-running-message-delay-second
-               nil
-               (lambda ()
-                 (when (and (get-buffer async-process-buffer-name)
-                            (get-process async-process-buffer-name))
-                   (with-current-buffer async-process-buffer-name
-                     (texe-set-header-line-process-runnning)
-                     (texe-l-show-process-buffer-content (current-buffer))))))
-  (run-at-time texe--process-running-recenter-delay-second-first
-               nil
-               (lambda ()
-                 (when (and (get-buffer async-process-buffer-name)
-                            (get-process async-process-buffer-name))
-                   (with-current-buffer async-process-buffer-name
-                     (texe-l-show-process-buffer-content (current-buffer))))))
-  (run-at-time texe--process-running-recenter-delay-second-second
+  (texe-l-setup-foreground-run-at-time-1 async-process-buffer-name
+                                         texe--process-running-message-delay-second)
+  (texe-l-setup-foreground-run-at-time-1 async-process-buffer-name
+                                         texe--process-running-recenter-delay-second-first)
+  (texe-l-setup-foreground-run-at-time-1 async-process-buffer-name
+                                         texe--process-running-recenter-delay-second-second))
+
+(defun texe-l-setup-foreground-run-at-time-1 (async-process-buffer-name delay-second)
+  (run-at-time delay-second
                nil
                (lambda ()
                  (when (and (get-buffer async-process-buffer-name)
@@ -250,7 +247,8 @@
         (setq texe-process-local-information (list (cons 'buffer-name (buffer-name))
                                                    (cons 'special special)
                                                    (cons 'command command)
-                                                   (cons 'force-yes-p force-yes-p)))
+                                                   (cons 'force-yes-p force-yes-p)
+                                                   (cons 'start-time (current-time))))
         (setq texe-process-local-background-p background-p)))
     (add-to-list 'texe-process-local-args-alist
                  (cons 'i-texe-buffer-name call-texe-buffer-name))))

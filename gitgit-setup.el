@@ -235,13 +235,6 @@ texe 実行後に status を更新するための callback 。"
       (error "setup temporary file directory failed  directory=%s"
              gitgit-temporary-file-directory-for-visited-file-name))))
 
-(defun gitgit--setup-run-at-time ()
-  (run-at-time gitgit-status-process-running-message-delay-second
-               nil
-               (lambda ()
-                 (when (texe-process-running-p (texe-get-process-back-buffer-name (buffer-name)))
-                   (texe-set-header-line-process-runnning)))))
-
 (defun gitgit--setup-first (texe-buffer-name initial-directory)
   (gitgit--setup-temporary-file-directory)
   (when (get-buffer texe-buffer-name)
@@ -259,8 +252,7 @@ texe 実行後に status を更新するための callback 。"
     (gitgit--setup-texe-mode)
     (gitgit--run-initialize-scripts)
     (add-hook 'texe-sentinel-callback-hook 'gitgit--texe-sentinel-callback)
-    (switch-to-buffer status-buffer-name)
-    (gitgit--setup-run-at-time)))
+    (switch-to-buffer status-buffer-name)))
 
 (defun gitgit--setup-after-second (texe-buffer-name)
   (let (local-variable-found-p)
@@ -275,8 +267,6 @@ texe 実行後に status を更新するための callback 。"
 
 (defun gitgit--setup-after-second-1 (texe-buffer-name)
   (with-current-buffer texe-buffer-name
-    (gitgit--run-initialize-scripts))
-  (with-current-buffer (gitgit-status-get-status-buffer-name texe-buffer-name)
-    (gitgit--setup-run-at-time)))
+    (gitgit--run-initialize-scripts)))
 
 (provide 'gitgit-setup)

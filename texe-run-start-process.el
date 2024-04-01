@@ -93,8 +93,11 @@
                                      sentinel-callback reload-p force-yes-p call-texe-buffer-name
                                      backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
-        (with-current-buffer (get-buffer-create current-async-process-buffer-name)
+        (with-current-buffer (get-buffer current-async-process-buffer-name)
           (texe-set-header-line-process-start))
+        (when background-p
+          (with-current-buffer (get-buffer async-process-buffer-name)
+            (texe-set-header-line-process-start)))
         (let ((run-last-buffer-point (point)))
           (when (assq 'i-from-texe args-alist)
             (with-current-buffer (get-buffer-create current-async-process-buffer-name)

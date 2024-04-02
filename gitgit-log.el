@@ -70,7 +70,7 @@
   gitgit-log-mode-name
   "Major mode for gitgit log"
   (define-key gitgit-log-mode-map "\C-i" 'gitgit-log--next-file-name)
-  (define-key gitgit-log-mode-map "g" 'gitgit-log--reload)
+  (define-key gitgit-log-mode-map "g" 'texe-rerun)
   (define-key gitgit-log-mode-map "n" 'gitgit-log--next)
   (define-key gitgit-log-mode-map "p" 'gitgit-log--previous)
   (define-key gitgit-log-mode-map " " 'scroll-up)
@@ -159,23 +159,6 @@
 (defun gitgit-log--search-file-name-line (limit)
   (re-search-forward gitgit-log-file-name-regexp
                      limit t))
-
-(defun gitgit-log--reload ()
-  (interactive)
-  (let ((force-yes-p (cdr (assq 'force-yes-p texe-process-local-information))))
-    (when (or force-yes-p
-              (yes-or-no-p (concat "run \""
-                                   (cdr (assq 'command texe-process-local-information))
-                                   "\" ?")))
-      (texe-run-start-process nil
-                              texe-process-local-special
-                              texe-process-local-command
-                              (buffer-name)
-                              texe-process-local-args-alist
-                              texe-process-local-sentinel-callback
-                              nil
-                              t
-                              force-yes-p))))
 
 (defun gitgit-log--next-file-name ()
   (interactive)

@@ -240,15 +240,16 @@
     (setq buffer-read-only nil)
     (erase-buffer)
     (setq buffer-read-only t)
-    (unless reload-p
-      (let ((command-append (cdr (assq 'texe-special-append-shell-command special-result))))
-        (when command-append
-          (setq command (concat command command-append)))))
     (with-environment-variables (("PAGER" ""))
       (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist)))
-             (process (start-process-shell-command current-async-process-buffer-name
+             process)
+        (unless (or reload-p script-tmpfile)
+          (let ((command-append (cdr (assq 'texe-special-append-shell-command special-result))))
+            (when command-append
+              (setq command (concat command command-append)))))
+        (setq process (start-process-shell-command current-async-process-buffer-name
                                                    current-async-process-buffer-name
-                                                   (if script-tmpfile script-tmpfile command))))
+                                                   (if script-tmpfile script-tmpfile command)))
         (set-process-sentinel process 'texe-l-process-sentinel)
         (texe-mode-process-mode)
         (texe-process-make-local-variable)

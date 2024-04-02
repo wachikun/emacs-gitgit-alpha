@@ -39,26 +39,9 @@
   (define-key gitgit-diff-mode-map "!" 'gitgit-switch-to-texe)
   (define-key gitgit-diff-mode-map "\C-c\C-v"
               'gitgit-switch-to-status)
-  (define-key gitgit-diff-mode-map "g" 'gitgit-diff--reload)
+  (define-key gitgit-diff-mode-map "g" 'texe-rerun)
   (define-key gitgit-diff-mode-map "\M-." 'gitgit-status--next-status-buffer)
   (define-key gitgit-diff-mode-map "\M-," 'gitgit-status--previous-status-buffer)
   (gitgit-update-buffer-header-line (gitgit-get-current-branch)))
-
-(defun gitgit-diff--reload ()
-  (interactive)
-  (let ((force-yes-p (cdr (assq 'force-yes-p texe-process-local-information))))
-    (when (or force-yes-p
-              (yes-or-no-p (concat "run \""
-                                   (cdr (assq 'command texe-process-local-information))
-                                   "\" ?")))
-      (texe-run-start-process nil
-                              texe-process-local-special
-                              texe-process-local-command
-                              (buffer-name)
-                              texe-process-local-args-alist
-                              texe-process-local-sentinel-callback
-                              nil
-                              t
-                              force-yes-p))))
 
 (provide 'gitgit-diff)

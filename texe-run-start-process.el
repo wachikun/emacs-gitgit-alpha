@@ -165,7 +165,12 @@
                         (throw 'mapcar nil))))
                   (seq-partition texe-mode-local-default-special-regexp-list
                                  2)))
-        (concat special " " found-default-special)))))
+        (if (and (stringp special)
+                 (string-match "^\\(.+?\\)\\((.+\\)$" special))
+            (concat (match-string 1 special)
+                    found-default-special
+                    (match-string 2 special))
+          (concat found-default-special " " special))))))
 
 (defun texe-l-modify-async-process-buffer-name-by-special (special-result async-process-buffer-name)
   (cond
@@ -241,8 +246,7 @@
     (erase-buffer)
     (setq buffer-read-only t)
     (with-environment-variables (("PAGER" ""))
-      (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist)))
-             process)
+      (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist))) process)
         (unless (or reload-p script-tmpfile)
           (let ((command-append (cdr (assq 'texe-special-append-shell-command special-result))))
             (when command-append

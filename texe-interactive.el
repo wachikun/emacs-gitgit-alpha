@@ -27,8 +27,9 @@
 (defun texe-rerun ()
   (interactive)
   (if texe-process-local-information
-      (let ((information texe-process-local-information))
-        (if (get-buffer (cdr (assq 'buffer-name information)))
+      (let* ((information texe-process-local-information)
+             (async-process-buffer-name (cdr (assq 'buffer-name information))))
+        (if (get-buffer async-process-buffer-name)
             (if (or (cdr (assq 'force-yes-p information))
                     (yes-or-no-p (concat "run \""
                                          (cdr (assq 'command information))
@@ -36,7 +37,8 @@
                 (with-current-buffer (texe-process-get-texe-buffer-name)
                   (texe--run-core (cdr (assq 'special information))
                                   (cdr (assq 'command information))
-                                  "CSproc"
+                                  async-process-buffer-name
+                                  t
                                   t
                                   (cdr (assq 'force-yes-p information))))
               (message "texe-run buffer not found"))

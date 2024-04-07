@@ -71,8 +71,9 @@
     (setq special (texe-l-apply-special-from-default-special-regexp-list-if-needed
                    special command)))
   (let ((special-result (texe-l-eval-special special reload-p)))
-    (setq async-process-buffer-name (texe-l-modify-async-process-buffer-name-by-special
-                                     special-result async-process-buffer-name))
+    (unless reload-p
+      (setq async-process-buffer-name (texe-l-modify-async-process-buffer-name-by-special
+                                       special-result async-process-buffer-name)))
     (let* ((call-texe-buffer-name (buffer-name)) backup-point-alist
            (async-process-back-buffer-name (texe-get-process-back-buffer-name async-process-buffer-name))
            (current-async-process-buffer-name (if background-p async-process-back-buffer-name
@@ -82,8 +83,8 @@
         (setq backup-point-alist (texe-l-setup-async-process-buffer async-process-buffer-name
                                                                     buffer-erase-p args-alist))
         (when (and (not (cdr (assq 'no-display-process-buffer args-alist)))
-                   (not (assq 'texe-special-ignore-process-running
-                              special-result)))
+                   (gethash 'texe-special-display-process-running-p
+                            special-result))
           (if background-p
               (texe-l-setup-background-run-at-time async-process-buffer-name
                                                    async-process-back-buffer-name)
@@ -152,40 +153,49 @@
     (format "%s%f sec." tmp sec)))
 
 (defun texe-l-apply-special-from-default-special-regexp-list-if-needed (special command)
-  (let ((special-alist (texe-l-eval-special special nil)))
-    (if (assq 'texe-special-ignore-default special-alist)
-        special
-      (let ((found-default-special ""))
-        (catch 'mapcar
-          (mapcar (lambda (pair)
-                    (let ((default-special (nth 0 pair))
-                          (command-regexp (nth 1 pair)))
-                      (when (string-match command-regexp command)
-                        (setq found-default-special default-special)
-                        (throw 'mapcar nil))))
-                  (seq-partition texe-mode-local-default-special-regexp-list
-                                 2)))
-        (if (and (stringp special)
-                 (string-match "^\\(.+?\\)\\((.+\\)$" special))
-            (concat (match-string 1 special)
-                    found-default-special
-                    (match-string 2 special))
-          (concat found-default-special " " special))))))
+  (let ((special-result (texe-l-eval-special special nil)))
+    (if (gethash 'texe-special-use-default-p special-result)
+        (let ((found-default-special ""))
+          (catch 'mapcar
+            (mapcar (lambda (pair)
+                      (let ((default-special (nth 0 pair))
+                            (command-regexp (nth 1 pair)))
+                        (when (string-match command-regexp command)
+                          (setq found-default-special default-special)
+                          (throw 'mapcar nil))))
+                    (seq-partition texe-mode-local-default-special-regexp-list
+                                   2)))
+          (if (stringp special)
+              ;; S 式がある
+              (cond
+               ((string-match "^\\(.+?\\)\\((.+\\)$" special)
+                (concat (match-string 1 special)
+                        found-default-special
+                        (match-string 2 special)))
+               ;; S 式がない
+               ((string-match "^\\([^(]+\\)$" special)
+                (concat (match-string 1 special)
+                        found-default-special))
+               (t (concat found-default-special special)))
+            (concat found-default-special special)))
+      special)))
 
 (defun texe-l-modify-async-process-buffer-name-by-special (special-result async-process-buffer-name)
   (cond
-   ((assq 'texe-special-buffer-name-suffix special-result)
+   ((gethash 'texe-special-buffer-name-suffix
+             special-result)
     (setq async-process-buffer-name (concat async-process-buffer-name
                                             (replace-regexp-in-string " "
                                                                       "-"
-                                                                      (cdr (assq 'texe-special-buffer-name-suffix special-result))))))
-   ((assq 'texe-special-buffer-name-suffix-time
-          special-result)
+                                                                      (gethash 'texe-special-buffer-name-suffix
+                                                                               special-result)))))
+   ((gethash 'texe-special-buffer-name-suffix-time
+             special-result)
     (setq async-process-buffer-name (concat async-process-buffer-name
                                             (replace-regexp-in-string " "
                                                                       "-"
-                                                                      (cdr (assq 'texe-special-buffer-name-suffix-time
-                                                                                 special-result)))
+                                                                      (gethash 'texe-special-buffer-name-suffix-time
+                                                                               special-result))
                                             "-"
                                             (format-time-string "%Y-%m-%d-%H:%M:%S"))))
    (t async-process-buffer-name)))
@@ -248,7 +258,8 @@
     (with-environment-variables (("PAGER" ""))
       (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist))) process)
         (unless (or reload-p script-tmpfile)
-          (let ((command-append (cdr (assq 'texe-special-append-shell-command special-result))))
+          (let ((command-append (gethash 'texe-special-append-shell-command
+                                         special-result)))
             (when command-append
               (setq command (concat command command-append)))))
         (setq process (start-process-shell-command current-async-process-buffer-name
@@ -281,10 +292,13 @@
       (let ((back-buffer-window (get-buffer-window async-process-back-buffer-name)))
         (unless (cdr (assq 'no-display-process-buffer args-alist))
           (cond
-           ((assq 'texe-special-no-display-process-buffer
-                  special-result))
-           ((assq 'texe-special-keep-select-texe-buffer
-                  special-result)
+           ((not (gethash 'texe-special-display-process-buffer-p
+                          special-result))
+            (if back-buffer-window
+                (set-window-buffer back-buffer-window async-process-buffer-name)
+              (pop-to-buffer async-process-buffer-name)))
+           ((gethash 'texe-special-keep-select-texe-buffer-p
+                     special-result)
             (if back-buffer-window
                 (set-window-buffer back-buffer-window async-process-buffer-name)
               (display-buffer async-process-buffer-name)))
@@ -293,10 +307,11 @@
                 (pop-to-buffer async-process-buffer-name))))))
     (unless (cdr (assq 'no-display-process-buffer args-alist))
       (cond
-       ((assq 'texe-special-no-display-process-buffer
-              special-result))
-       ((assq 'texe-special-keep-select-texe-buffer
-              special-result)
+       ((not (gethash 'texe-special-display-process-buffer-p
+                      special-result))
+        (pop-to-buffer async-process-buffer-name))
+       ((gethash 'texe-special-keep-select-texe-buffer-p
+                 special-result)
         (display-buffer async-process-buffer-name))
        (t (pop-to-buffer async-process-buffer-name))))))
 
@@ -304,8 +319,8 @@
   (catch 'error
     (if special
         (with-temp-buffer
-          (set (make-local-variable 'tmp-special-local-result-alist)
-               nil)
+          (set (make-local-variable 'tmp-special-local-result-hash)
+               (copy-hash-table texe-special-default-hash))
           (set (make-local-variable 'tmp-special-local-reload-p)
                reload-p)
           (when (string-match texe--special-eval-lisp-code-regexp
@@ -317,9 +332,12 @@
                 (unless (ignore-errors (let ((read-result (read-from-string text start)))
                                          (eval (car read-result))
                                          (setq start (cdr read-result))))
-                  (throw 'error tmp-special-local-result-alist)))))
-          tmp-special-local-result-alist)
-      nil)))
+                  (message "eval error text = %s" text)
+                  (message "           read-from-string = %s"
+                           (read-from-string text start))
+                  (throw 'error tmp-special-local-result-hash)))))
+          tmp-special-local-result-hash)
+      (copy-hash-table texe-special-default-hash))))
 
 (defun texe-l-process-sentinel (process event)
   (with-current-buffer (process-buffer process)

@@ -113,7 +113,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                                   force-yes-p))))))
 
 (defun texe-special-change-major-mode-if-match (special-result)
-  (let ((process-major-mode (cdr (assq 'texe-special-set-major-mode special-result))))
+  (let ((process-major-mode (gethash 'texe-special-buffer-major-mode special-result)))
     (when process-major-mode
       (let ((copy-local-variable-list (texe-process-get-local-variable-list)))
         (funcall process-major-mode)
@@ -239,11 +239,12 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
 (defun texe--sentinel-callback ()
   "texe sentinel callback
 texe 実行後に実行される callback 。"
-  (let ((callback-function (cdr (assq 'texe-special-callback-function texe-process-local-special-result))))
-    (unless (assq 'texe-special-ignore-callback texe-process-local-special-result)
+  (let ((user-callback-function (gethash 'texe-special-user-callback texe-process-local-special-result)))
+    (when (gethash 'texe-special-call-texe-callback-p
+                   texe-process-local-special-result)
       (run-hooks 'texe-sentinel-callback-hook))
-    (when callback-function
-      (funcall callback-function)))
+    (when user-callback-function
+      (funcall user-callback-function)))
   (texe-update-point)
   (texe-special-update-point texe-process-local-special-result)
   ;; ここで mode が変わると buffer local 変数が消えることに注意

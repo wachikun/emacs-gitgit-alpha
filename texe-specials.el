@@ -26,56 +26,80 @@
 
 ;;; Code:
 
-(defun texe-special-ignore-default ()
-  (add-to-list 'tmp-special-local-result-alist
-               (list 'texe-special-ignore-default)))
+(defvar texe-special-default-hash (make-hash-table :test 'equal))
+(defvar texe-special-default-alist (list (cons 'texe-special-call-texe-callback-p t)
+                                         (cons 'texe-special-display-process-buffer-p
+                                               t)
+                                         (cons 'texe-special-display-process-running-p
+                                               t)
+                                         (cons 'texe-special-goto-point-max-p nil)
+                                         (cons 'texe-special-goto-point-min-p nil)
+                                         (cons 'texe-special-keep-select-texe-buffer-p
+                                               nil)
+                                         (cons 'texe-special-use-default-p t)
+                                         (cons 'texe-special-append-shell-command nil)
+                                         (cons 'texe-special-buffer-name-suffix nil)
+                                         (cons 'texe-special-buffer-name-suffix-time
+                                               nil)
+                                         (cons 'texe-special-buffer-major-mode nil)
+                                         (cons 'texe-special-user-callback nil)))
+(defun texe-specials-setup ()
+  (mapc (lambda (a)
+          (puthash (car a)
+                   (cdr a)
+                   texe-special-default-hash))
+        texe-special-default-alist))
 
-(defun texe-special-buffer-name-suffix (suffix)
-  (unless tmp-special-local-reload-p
-    (add-to-list 'tmp-special-local-result-alist
-                 (cons 'texe-special-buffer-name-suffix suffix))))
+;; setup
+(texe-specials-setup)
 
-(defun texe-special-buffer-name-suffix-time (suffix)
-  (unless tmp-special-local-reload-p
-    (add-to-list 'tmp-special-local-result-alist
-                 (cons 'texe-special-buffer-name-suffix-time
-                       suffix))))
+(defun texe-special-set-call-texe-callback-p (texe-special-call-texe-callback-p)
+  (puthash 'texe-special-call-texe-callback-p
+           texe-special-call-texe-callback-p tmp-special-local-result-hash))
 
-(defun texe-special-set-major-mode (major-mode-symbol)
-  (add-to-list 'tmp-special-local-result-alist
-               (cons 'texe-special-set-major-mode major-mode-symbol)))
+(defun texe-special-set-display-process-buffer-p (texe-special-display-process-buffer-p)
+  (puthash 'texe-special-display-process-buffer-p
+           texe-special-display-process-buffer-p tmp-special-local-result-hash))
 
-(defun texe-special-keep-select-texe-buffer ()
-  (add-to-list 'tmp-special-local-result-alist
-               (list 'texe-special-keep-select-texe-buffer)))
+(defun texe-special-set-display-process-running-p (texe-special-display-process-running-p)
+  (puthash 'texe-special-display-process-running-p
+           texe-special-display-process-running-p tmp-special-local-result-hash))
 
-(defun texe-special-no-display-process-buffer ()
-  (add-to-list 'tmp-special-local-result-alist
-               (list 'texe-special-no-display-process-buffer)))
+(defun texe-special-set-goto-point-min-p (texe-special-goto-point-min-p)
+  (puthash 'texe-special-goto-point-min-p texe-special-goto-point-min-p
+           tmp-special-local-result-hash))
 
-(defun texe-special-ignore-process-running ()
-  (add-to-list 'tmp-special-local-result-alist
-               (list 'texe-special-ignore-process-running)))
+(defun texe-special-set-goto-point-max-p (texe-special-goto-point-max-p)
+  (puthash 'texe-special-goto-point-max-p texe-special-goto-point-max-p
+           tmp-special-local-result-hash))
 
-(defun texe-special-set-point-min ()
-  (add-to-list 'tmp-special-local-result-alist
-               (list 'texe-special-set-point-min)))
+(defun texe-special-set-keep-select-texe-buffer-p (texe-special-keep-select-texe-buffer-p)
+  (puthash 'texe-special-keep-select-texe-buffer-p
+           texe-special-keep-select-texe-buffer-p tmp-special-local-result-hash))
 
-(defun texe-special-set-point-max ()
-  (add-to-list 'tmp-special-local-result-alist
-               (list 'texe-special-set-point-max)))
+(defun texe-special-set-use-default-p (texe-special-use-default-p)
+  (puthash 'texe-special-use-default-p texe-special-use-default-p
+           tmp-special-local-result-hash))
 
-(defun texe-special-append-shell-command (command)
-  (add-to-list 'tmp-special-local-result-alist
-               (cons 'texe-special-append-shell-command command)))
+(defun texe-special-set-append-shell-command (texe-special-append-shell-command)
+  (puthash 'texe-special-append-shell-command
+           texe-special-append-shell-command tmp-special-local-result-hash))
 
-(defun texe-special-ignore-callback ()
-  (add-to-list 'tmp-special-local-result-alist
-               (list 'texe-special-ignore-callback)))
+(defun texe-special-set-buffer-name-suffix (texe-special-buffer-name-suffix)
+  (puthash 'texe-special-buffer-name-suffix
+           texe-special-buffer-name-suffix tmp-special-local-result-hash))
 
-(defun texe-special-set-callback (callback-function)
-  (add-to-list 'tmp-special-local-result-alist
-               (cons 'texe-special-callback-function callback-function)))
+(defun texe-special-set-buffer-name-suffix-time (texe-special-buffer-name-suffix-time)
+  (puthash 'texe-special-buffer-name-suffix-time
+           texe-special-buffer-name-suffix-time tmp-special-local-result-hash))
+
+(defun texe-special-set-major-mode (texe-special-buffer-major-mode)
+  (puthash 'texe-special-buffer-major-mode texe-special-buffer-major-mode
+           tmp-special-local-result-hash))
+
+(defun texe-special-set-user-callback (texe-special-user-callback)
+  (puthash 'texe-special-user-callback texe-special-user-callback
+           tmp-special-local-result-hash))
 
 (defun texe-special-reload-p ()
   tmp-special-local-reload-p)

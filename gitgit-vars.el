@@ -115,15 +115,15 @@ ls -l /tmp/$NAME.tar.gz
 #
 # 下記関数を指定できる。
 # (同様の効果を持つものを複数指定した場合、どちらが優先されるかなどは規定していない)
-#     - (texe-special-buffer-name-suffix \"suffix\")
-#     - (texe-special-buffer-name-suffix-time \"suffix\")
+#     - (texe-special-set-buffer-name-suffix \"suffix\")
+#     - (texe-special-set-buffer-name-suffix-time \"suffix\")
 #     - (texe-special-set-major-mode 'major-mode-name)
-#     - (texe-special-keep-select-texe-buffer)
-#     - (texe-special-no-display-process-buffer)
-#     - (texe-special-set-point-min)
-#     - (texe-special-set-point-max)
+#     - (texe-special-set-keep-select-texe-buffer-p t)
+#     - (texe-special-set-display-process-buffer-p t)
+#     - (texe-special-set-goto-point-min-p t)
+#     - (texe-special-set-goto-point-max-p t)
 # (ex.
-# #@(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\")
+# #@(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-buffer-name-suffix \"-diff\")
 
 
 
@@ -157,40 +157,40 @@ ls -l /tmp/$NAME.tar.gz
 # special 未指定時の挙動を eval される文字列と regexp で指定
 # (一括して設定するため、他とは異なる少し特殊な指定方法となっていることに注意)
 " texe-special-comment-special-regexp "-begin
-(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix \"-diff\") (texe-special-keep-select-texe-buffer) (unless (texe-special-reload-p) (texe-special-set-point-min))
+(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-buffer-name-suffix \"-diff\") (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
  ?diff
 
-(texe-special-set-major-mode 'gitgit-log-mode) (texe-special-buffer-name-suffix \"-log\") (unless (texe-special-reload-p) (texe-special-set-point-min))
+(texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-buffer-name-suffix \"-log\") (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
  log
 
-(texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-buffer-name-suffix \"-blame\") (texe-special-set-point-min)
+(texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-buffer-name-suffix \"-blame\") (texe-special-set-goto-point-min-p t)
  blame
 
-(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-branch\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-branch\")
  branch
 
-(texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-commit\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-display-process-running-p nil) (texe-special-set-buffer-name-suffix \"-commit\")
  commit
 
-(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-checkout\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-checkout\")
  checkout
 
-(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-switch\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-switch\")
  switch
 
-(texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-merge\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-display-process-running-p nil) (texe-special-set-buffer-name-suffix \"-merge\")
  merge
 
-(texe-special-keep-select-texe-buffer) (texe-special-ignore-process-running) (texe-special-buffer-name-suffix \"-rebase\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-display-process-running-p nil) (texe-special-set-buffer-name-suffix \"-rebase\")
  rebase
 
-(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-push\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-push\")
  push
 
-(texe-special-keep-select-texe-buffer) (texe-special-buffer-name-suffix \"-pull\")
+(texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-pull\")
  pull
 
-(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-buffer-name-suffix \"-grep\") (unless (texe-special-reload-p) (texe-special-set-point-min))
+(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-set-buffer-name-suffix \"-grep\") (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
  ?\\(grep\\|rg\\|hw\\|ag\\) 
 " texe-special-comment-special-regexp "-end
 
@@ -206,7 +206,7 @@ ls -l /tmp/$NAME.tar.gz
 # 実行された script の出力が status に反映される。
 # --short --branch option が必須。
 " gitgit-texe-special-comment-status-initialize-script
-                                                  "-begin (texe-special-ignore-default)
+                                                  "-begin (texe-special-set-use-default-p nil)
 git status --short --branch 2> /dev/null
 
 
@@ -335,24 +335,24 @@ git status --long
 #
 # gitgit-status-[command] のように記述することで指定可能。
 
-#@gitgit-status-blame (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-point-min) (texe-special-ignore-default)
+#@gitgit-status-blame (texe-special-set-call-texe-callback-p nil) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-goto-point-min-p t)
 git blame '--date=format:%Y-%m-%d %H:%m' 2> /dev/null
 # 日時は gitgit で参照していないので形式は任意
 # ここでは横幅を取らない形で指定している。
 
 
-#@gitgit-status-log (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-point-min) (texe-special-ignore-default) (unless (texe-special-reload-p) (texe-special-set-point-min))
+#@gitgit-status-log (texe-special-set-call-texe-callback-p nil) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-log-mode) (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
 git log -n 32 --stat-width=800 --graph --decorate=full --stat
 # git log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat
 # 大きなプロジェクトでは --graph などを外してしまうと高速
 # git log -n 32 --stat-width=800
 
 
-#@gitgit-status-diff (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-keep-select-texe-buffer) (texe-special-ignore-default) (unless (texe-special-reload-p) (texe-special-set-point-min))
+#@gitgit-status-diff (texe-special-set-call-texe-callback-p nil) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
 git diff
 
 
-#@gitgit-status-commit (texe-special-keep-select-texe-buffer) (texe-special-ignore-default)
+#@gitgit-status-commit (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-use-default-p nil)
 git commit
 "))
 

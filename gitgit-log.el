@@ -71,7 +71,8 @@
   "Major mode for gitgit log"
   (define-key gitgit-log-mode-map "\C-i" 'gitgit-log--next-file-name)
   (define-key gitgit-log-mode-map "g" 'texe-rerun)
-  (define-key gitgit-log-mode-map "\C-c\C-c" 'texe-rerun)
+  (define-key gitgit-log-mode-map "\C-c\C-c"
+              'texe-rerun)
   (define-key gitgit-log-mode-map "n" 'gitgit-log--next)
   (define-key gitgit-log-mode-map "p" 'gitgit-log--previous)
   (define-key gitgit-log-mode-map " " 'scroll-up)
@@ -232,7 +233,7 @@
               (gitgit-status--run nil
                                   "diff"
                                   "diff"
-                                  'gitgit-status--sentinel-callback-not-reload-status
+                                  'gitgit-status--sentinel-callback-not-rerun-status
                                   (list (concat revision "~")
                                         revision))))
         (message "not found")))))

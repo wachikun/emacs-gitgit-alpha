@@ -110,8 +110,9 @@
   (define-key gitgit-status-mode-map "u" 'gitgit-status--unmark)
   (define-key gitgit-status-mode-map "p" 'gitgit-status--previous-line)
   (define-key gitgit-status-mode-map "n" 'gitgit-status--next-line)
-  (define-key gitgit-status-mode-map "g" 'gitgit-status--reload-process)
-  (define-key gitgit-status-mode-map "\C-c\C-c" 'gitgit-status--reload-process)
+  (define-key gitgit-status-mode-map "g" 'gitgit-status--rerun-process)
+  (define-key gitgit-status-mode-map "\C-c\C-c"
+              'gitgit-status--rerun-process)
   (define-key gitgit-status-mode-map "a" 'gitgit-status--git-add)
   (define-key gitgit-status-mode-map "b" 'gitgit-status--git-blame)
   (define-key gitgit-status-mode-map "d" 'gitgit-status--git-remove)
@@ -139,7 +140,7 @@
               'gitgit-status--view-status-from-texe-buffer)
   (set (make-local-variable 'gitgit-status-local-modified-files-function)
        nil)
-  (set (make-local-variable 'gitgit-status-local-ignore-reload)
+  (set (make-local-variable 'gitgit-status-local-ignore-rerun)
        nil)
   (set (make-local-variable 'gitgit-status-local-end-of-git-status-point)
        (point-min))
@@ -174,12 +175,12 @@
 ;; (defun gitgit-status-set-mode-name-suffix (suffix)
 ;;   (setq mode-name (concat gitgit-status--mode-name " " suffix)))
 
-(defun gitgit-status-sentinel-callback-reload-status-from-texe ()
-  "texe $BMQ$N(B reload sentinel callback
+(defun gitgit-status-sentinel-callback-rerun-status-from-texe ()
+  "texe $BMQ$N(B rerun sentinel callback
 texe $B<B9T8e$O(B status $B$,JQ2=$9$k2DG=@-$,$"$k$N$G!"K\(B callback $B$r8F$S=P$7$F(B status $B$r99?7$9$k!#(B"
   (when (get-buffer (gitgit-status-get-status-buffer-name (buffer-name)))
     (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
-      (gitgit-status--reload-status)
+      (gitgit-status--rerun-status)
       (texe-update-point)
       (texe-set-header-line-process-success))))
 
@@ -191,24 +192,24 @@ texe $B<B9T8e$O(B status $B$,JQ2=$9$k2DG=@-$,$"$k$N$G!"K\(B callback $B$r8F
 (defun gitgit-status-get-process-back-buffer-name (buffer-name)
   (texe-get-process-back-buffer-name (gitgit-status-get-status-buffer-name buffer-name)))
 
-(defun gitgit-status--sentinel-callback-reload-status ()
-  "gitgit-status $BMQ$N(B reload sentinel callback
+(defun gitgit-status--sentinel-callback-rerun-status ()
+  "gitgit-status $BMQ$N(B rerun sentinel callback
 commit/add/rm/restore $B$J$I!"<B9T8e$K(B status $B$,JQ2=$9$k>l9g$K8F$S=P$9!#(B"
   (texe-update-point)
   (texe-update-window-start texe-process-local-backup-point-alist)
   (texe-special-update-point texe-process-local-special-result)
   (texe-special-change-major-mode-if-match texe-process-local-special-result)
-  (setq gitgit-status-local-ignore-reload t)
-  (gitgit-status--reload-status))
+  (setq gitgit-status-local-ignore-rerun t)
+  (gitgit-status--rerun-status))
 
-(defun gitgit-status--sentinel-callback-reload-status-kill-process-buffer ()
-  "gitgit-status $BMQ$N(B reload sentinel callback
+(defun gitgit-status--sentinel-callback-rerun-status-kill-process-buffer ()
+  "gitgit-status $BMQ$N(B rerun sentinel callback
 commit/add/rm/restore $B$J$I!"<B9T8e$K(B status $B$,JQ2=$9$k>l9g$K8F$S=P$9!#(B"
   (setq texe-process-local-buffer-kill-p t)
-  (gitgit-status--sentinel-callback-reload-status))
+  (gitgit-status--sentinel-callback-rerun-status))
 
-(defun gitgit-status--sentinel-callback-not-reload-status ()
-  "gitgit-status $BMQ$N(B reload $B$7$J$$(B sentinel callback
+(defun gitgit-status--sentinel-callback-not-rerun-status ()
+  "gitgit-status $BMQ$N(B rerun $B$7$J$$(B sentinel callback
 diff/log $B$J$I!"<B9T8e$K(B status $B$,JQ2=$7$J$$>l9g$K8F$S=P$9!#(B"
   (texe-update-point)
   (texe-update-window-start texe-process-local-backup-point-alist)

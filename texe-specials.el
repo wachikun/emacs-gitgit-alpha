@@ -101,7 +101,7 @@
   (puthash 'texe-special-user-callback texe-special-user-callback
            tmp-special-local-result-hash))
 
-(defun texe-special-reload-p ()
-  tmp-special-local-reload-p)
+(defun texe-special-rerun-p ()
+  tmp-special-local-rerun-p)
 
 (provide 'texe-specials)

@@ -48,7 +48,7 @@ gitgit status では `m` キーでマークしたファイルに対して、 Git
 
 * `c commit`
 
-* `g reload status`
+* `g rerun status`
 
 * `l log`
 
@@ -155,7 +155,7 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 |`(texe-special-set-point-min)`|出力バッファの point を `(point-min)` に設定する|
 |`(texe-special-set-point-max)`|出力バッファの point を `(point-max)` に設定する|
 |`(texe-special-append-shell-command)`|シェルコマンドの最後に引数を追加する|
-|`(texe-special-reload-p)`|リロードされた場合に t を返す|
+|`(texe-special-rerun-p)`|リロードされた場合に t を返す|
 
 上記の他に、特殊なコマンドとして `@FORCE-YES` というものがあります。これを先頭に付加することでコマンド実行時の `yes-or-no-p` を省略します。
 

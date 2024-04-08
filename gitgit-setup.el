@@ -36,9 +36,9 @@
 (defun gitgit-setup-modified-files-update-status ()
   (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
     (setq gitgit-status-local-modified-files-function
-          'gitgit-status-after-save-hook-reload)))
+          'gitgit-status-after-save-hook-rerun)))
 
-(defun gitgit-setup (initial-directory reload-p)
+(defun gitgit-setup (initial-directory rerun-p)
   (unless (string-match "/$" initial-directory)
     (setq initial-directory (concat initial-directory "/")))
   (setq initial-directory (expand-file-name initial-directory))
@@ -52,7 +52,7 @@
                    (get-buffer (gitgit-status-get-status-buffer-name texe-buffer-name)))
               (progn
                 (gitgit--setup-after-second texe-buffer-name)
-                (unless reload-p
+                (unless rerun-p
                   (let ((status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name)))
                     (switch-to-buffer status-buffer-name))))
             (gitgit--setup-first texe-buffer-name initial-directory))))
@@ -134,7 +134,7 @@
 
 (defun gitgit--status-sentinel-callback ()
   "status sentinel callback
-status 生成 (reload) 後に呼ばれる callback。"
+status 生成 (rerun) 後に呼ばれる callback。"
   (when (boundp 'gitgit-status-local-recent-files-hash)
     (gitgit--status-sentinel-callback-insert-recent-files))
   (texe-update-point)
@@ -176,7 +176,7 @@ status 生成 (reload) 後に呼ばれる callback。"
 texe 実行後に status を更新するための callback 。"
   (when (get-buffer (texe-process-get-texe-buffer-name))
     (with-current-buffer (texe-process-get-texe-buffer-name)
-      (gitgit-status-sentinel-callback-reload-status-from-texe))))
+      (gitgit-status-sentinel-callback-rerun-status-from-texe))))
 
 (defun gitgit--setup-texe-mode ()
   (texe-mode)

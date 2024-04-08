@@ -40,9 +40,9 @@
 (require 'gitgit-log)
 (require 'gitgit-texe-updater)
 
-(defun gitgit (initial-directory &optional reload-p)
+(defun gitgit (initial-directory &optional rerun-p)
   (interactive "Ddirectory: ")
-  (gitgit-setup initial-directory reload-p))
+  (gitgit-setup initial-directory rerun-p))
 
 (defun gitgit-version ()
   (interactive)

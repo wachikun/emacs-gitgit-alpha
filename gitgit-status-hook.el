@@ -49,8 +49,8 @@
           (gitgit-status--set-file-line-face)
           (setq buffer-read-only backup-buffer-read-only))))))
 
-(defun gitgit-status-after-save-hook-reload (_check-file-name)
-  (gitgit-status--reload-process))
+(defun gitgit-status-after-save-hook-rerun (_check-file-name)
+  (gitgit-status--rerun-process))
 
 (defun gitgit-status--after-save-hook ()
   (mapc #'(lambda (buffer)

@@ -79,7 +79,7 @@
           t)
     (setq buffer-read-only nil)
     (gitgit-blame--move-information-text-to-overlay)
-    (gitgit-status--sentinel-callback-not-reload-status)
+    (gitgit-status--sentinel-callback-not-rerun-status)
     (gitgit-blame--change-major-mode-and-keep-blame-mode (lambda ()
                                                            (set-visited-file-name (gitgit-blame-get-visited-file-name "blame"
                                                                                                                       file-name revision))))

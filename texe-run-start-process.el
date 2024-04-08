@@ -66,12 +66,12 @@
 
 (defun texe-run-start-process (background-p special command async-process-buffer-name
                                             args-alist &optional sentinel-callback buffer-erase-p
-                                            reload-p force-yes-p)
-  (unless reload-p
+                                            rerun-p force-yes-p)
+  (unless rerun-p
     (setq special (texe-l-apply-special-from-default-special-regexp-list-if-needed
                    special command)))
-  (let ((special-result (texe-l-eval-special special reload-p)))
-    (unless reload-p
+  (let ((special-result (texe-l-eval-special special rerun-p)))
+    (unless rerun-p
       (setq async-process-buffer-name (texe-l-modify-async-process-buffer-name-by-special
                                        special-result async-process-buffer-name)))
     (let* ((call-texe-buffer-name (buffer-name)) backup-point-alist
@@ -91,7 +91,7 @@
             (texe-l-setup-foreground-run-at-time async-process-buffer-name)))
         (texe-l-setup-process-buffer background-p
                                      special-result special command args-alist
-                                     sentinel-callback reload-p force-yes-p call-texe-buffer-name
+                                     sentinel-callback rerun-p force-yes-p call-texe-buffer-name
                                      backup-point-alist current-async-process-buffer-name)
         (setq texe--processes (1+ texe--processes))
         (with-current-buffer (get-buffer current-async-process-buffer-name)
@@ -248,7 +248,7 @@
                      (texe-l-show-process-buffer-content (current-buffer)))))))
 
 (defun texe-l-setup-process-buffer (background-p special-result special command
-                                                 args-alist sentinel-callback reload-p force-yes-p
+                                                 args-alist sentinel-callback rerun-p force-yes-p
                                                  call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
   (with-current-buffer (get-buffer-create current-async-process-buffer-name)
     (setq buffer-undo-list t)
@@ -257,7 +257,7 @@
     (setq buffer-read-only t)
     (with-environment-variables (("PAGER" ""))
       (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist))) process)
-        (unless (or reload-p script-tmpfile)
+        (unless (or rerun-p script-tmpfile)
           (let ((command-append (gethash 'texe-special-append-shell-command
                                          special-result)))
             (when command-append
@@ -315,14 +315,14 @@
         (display-buffer async-process-buffer-name))
        (t (pop-to-buffer async-process-buffer-name))))))
 
-(defun texe-l-eval-special (special reload-p)
+(defun texe-l-eval-special (special rerun-p)
   (catch 'error
     (if special
         (with-temp-buffer
           (set (make-local-variable 'tmp-special-local-result-hash)
                (copy-hash-table texe-special-default-hash))
-          (set (make-local-variable 'tmp-special-local-reload-p)
-               reload-p)
+          (set (make-local-variable 'tmp-special-local-rerun-p)
+               rerun-p)
           (when (string-match texe--special-eval-lisp-code-regexp
                               special)
             (let* ((start 0)

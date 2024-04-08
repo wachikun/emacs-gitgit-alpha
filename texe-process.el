@@ -63,7 +63,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                             back-buffer-name))
 
 (defun texe-run-with-scripts (special command async-process-buffer-name
-                                      buffer-erase-p reload-p force-yes-p)
+                                      buffer-erase-p rerun-p force-yes-p)
   (cond
    ((string-match texe--special-comment-regexp-elisp
                   special)
@@ -90,7 +90,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                                 (texe--sentinel-callback)
                                 (delete-file (cdr (assq 'script-tmpfile texe-process-local-args-alist))))
                               buffer-erase-p
-                              reload-p
+                              rerun-p
                               force-yes-p)))
    (t (let ((status-initializer-found (catch 'status-initializer-found
                                         (mapc #'(lambda (regex-func)
@@ -109,7 +109,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                                   (list (cons 'i-from-texe t))
                                   'texe--sentinel-callback
                                   buffer-erase-p
-                                  reload-p
+                                  rerun-p
                                   force-yes-p))))))
 
 (defun texe-special-change-major-mode-if-match (special-result)
@@ -222,10 +222,10 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
           buffer-suffix))
 
 (defun texe--run-core (special command async-process-buffer-name
-                               buffer-erase-p reload-p force-yes-p)
+                               buffer-erase-p rerun-p force-yes-p)
   (if special
       (texe-run-with-scripts special command async-process-buffer-name
-                             buffer-erase-p reload-p force-yes-p)
+                             buffer-erase-p rerun-p force-yes-p)
     (texe-run-start-process nil
                             special
                             command
@@ -233,7 +233,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                             (list (cons 'i-from-texe t))
                             'texe--sentinel-callback
                             buffer-erase-p
-                            reload-p
+                            rerun-p
                             force-yes-p)))
 
 (defun texe--sentinel-callback ()

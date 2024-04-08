@@ -157,10 +157,10 @@ ls -l /tmp/$NAME.tar.gz
 # special 未指定時の挙動を eval される文字列と regexp で指定
 # (一括して設定するため、他とは異なる少し特殊な指定方法となっていることに注意)
 " texe-special-comment-special-regexp "-begin
-(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-buffer-name-suffix \"-diff\") (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
+(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-buffer-name-suffix \"-diff\") (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
  ?diff
 
-(texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-buffer-name-suffix \"-log\") (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
+(texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-buffer-name-suffix \"-log\") (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
  log
 
 (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-buffer-name-suffix \"-blame\") (texe-special-set-goto-point-min-p t)
@@ -190,7 +190,7 @@ ls -l /tmp/$NAME.tar.gz
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-pull\")
  pull
 
-(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-set-buffer-name-suffix \"-grep\") (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
+(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-set-buffer-name-suffix \"-grep\") (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
  ?\\(grep\\|rg\\|hw\\|ag\\) 
 " texe-special-comment-special-regexp "-end
 
@@ -341,14 +341,14 @@ git blame '--date=format:%Y-%m-%d %H:%m' 2> /dev/null
 # ここでは横幅を取らない形で指定している。
 
 
-#@gitgit-status-log (texe-special-set-call-texe-callback-p nil) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-log-mode) (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
+#@gitgit-status-log (texe-special-set-call-texe-callback-p nil) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-log-mode) (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
 git log -n 32 --stat-width=800 --graph --decorate=full --stat
 # git log -n 32 --stat-width=800 --graph --decorate=full --patch-with-stat
 # 大きなプロジェクトでは --graph などを外してしまうと高速
 # git log -n 32 --stat-width=800
 
 
-#@gitgit-status-diff (texe-special-set-call-texe-callback-p nil) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-reload-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
+#@gitgit-status-diff (texe-special-set-call-texe-callback-p nil) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
 git diff
 
 

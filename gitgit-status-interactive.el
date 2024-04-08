@@ -105,7 +105,7 @@
 (defun gitgit-status--run-commit ()
   (interactive)
   (gitgit-status--run-commit-1 nil "commit"
-                               "commit" 'gitgit-status--sentinel-callback-reload-status
+                               "commit" 'gitgit-status--sentinel-callback-rerun-status
                                nil))
 
 (defun gitgit-status--run-find-file ()
@@ -146,15 +146,15 @@
       (unless (gitgit-status--ignore-current-line-p)
         (throw 'loop nil)))))
 
-(defun gitgit-status--reload-status ()
+(defun gitgit-status--rerun-status ()
   (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
     (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
-      (gitgit-status--reload-process))))
+      (gitgit-status--rerun-process))))
 
-(defun gitgit-status--reload-process ()
+(defun gitgit-status--rerun-process ()
   (interactive)
-  (if gitgit-status-local-ignore-reload
-      (message "Can not reload")
+  (if gitgit-status-local-ignore-rerun
+      (message "Can not rerun")
     (clrhash gitgit-status-local-after-save-hash)
     (gitgit default-directory t)))
 
@@ -163,7 +163,7 @@
   (let ((file-list (gitgit-status--get-mark-file-names-or-current-file-name
                     'gitgit-status--can-add)))
     (when file-list
-      (gitgit-status--run t "add" "add" 'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
+      (gitgit-status--run t "add" "add" 'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                           file-list))))
 
 (defun gitgit-status--git-blame ()
@@ -189,7 +189,7 @@
   (let ((file-list (gitgit-status--get-mark-file-names-or-current-file-name
                     'gitgit-status--can-remove)))
     (when file-list
-      (gitgit-status--run t "rm" "remove" 'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
+      (gitgit-status--run t "rm" "remove" 'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                           file-list))))
 
 (defun gitgit-status--git-diff-current-file (arg)
@@ -203,7 +203,7 @@
       (when (gitgit-status--get-current-file-name 'gitgit-status--can-diff)
         (push (gitgit-status--get-current-file-name 'gitgit-status--can-diff)
               file-list)))
-    (gitgit-status--run nil diff "diff" 'gitgit-status--sentinel-callback-not-reload-status
+    (gitgit-status--run nil diff "diff" 'gitgit-status--sentinel-callback-not-rerun-status
                         file-list)))
 
 (defun gitgit-status--git-diff-mark-files (arg)
@@ -222,7 +222,7 @@
         (setq file-list staged-files)
       (setq file-list not-staged-files)
       (setq diff "diff"))
-    (gitgit-status--run nil diff "diff" 'gitgit-status--sentinel-callback-not-reload-status
+    (gitgit-status--run nil diff "diff" 'gitgit-status--sentinel-callback-not-rerun-status
                         file-list)))
 
 (defun gitgit-status--git-log (arg)
@@ -234,7 +234,7 @@
     (gitgit-status--run nil
                         "log"
                         "log"
-                        'gitgit-status--sentinel-callback-not-reload-status
+                        'gitgit-status--sentinel-callback-not-rerun-status
                         file-list
                         (lambda (command)
                           (if arg
@@ -311,15 +311,15 @@
             (progn
               (when file-list-restore
                 (gitgit-status--run t "restore" "auto-revert-restore"
-                                    'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
+                                    'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                                     file-list-restore))
               (when file-list-restore-staged
                 (gitgit-status--run t "restore --staged" "auto-revert-restore--staged"
-                                    'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
+                                    'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                                     file-list-restore-staged))
               (when file-list-rm-cached
                 (gitgit-status--run t "rm --cached" "auto-revert-rm--cached"
-                                    'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
+                                    'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                                     file-list-rm-cached)))
           (message "canceled!"))))))
 
@@ -338,7 +338,7 @@
     (setq file-list (append file-list
                             (list destination)))
     (if file-list
-        (gitgit-status--run t "mv" "mv" 'gitgit-status--sentinel-callback-reload-status-kill-process-buffer
+        (gitgit-status--run t "mv" "mv" 'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                             file-list)
       (message "file-name not found"))))
 

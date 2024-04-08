@@ -41,7 +41,8 @@
   (define-key compilation-minor-mode-map "g"
               nil)
   (define-key gitgit-grep-mode-map "g" 'texe-rerun)
-  (define-key gitgit-grep-mode-map "\C-c\C-c" 'texe-rerun)
+  (define-key gitgit-grep-mode-map "\C-c\C-c"
+              'texe-rerun)
   (gitgit-update-buffer-header-line (gitgit-get-current-branch)))
 
 (provide 'gitgit-grep)

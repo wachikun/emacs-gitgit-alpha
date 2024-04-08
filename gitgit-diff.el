@@ -40,6 +40,7 @@
   (define-key gitgit-diff-mode-map "\C-c\C-v"
               'gitgit-switch-to-status)
   (define-key gitgit-diff-mode-map "g" 'texe-rerun)
+  (define-key gitgit-diff-mode-map "\C-c\C-c" 'texe-rerun)
   (define-key gitgit-diff-mode-map "\M-." 'gitgit-status--next-status-buffer)
   (define-key gitgit-diff-mode-map "\M-," 'gitgit-status--previous-status-buffer)
   (gitgit-update-buffer-header-line (gitgit-get-current-branch)))

@@ -111,6 +111,7 @@
   (define-key gitgit-status-mode-map "p" 'gitgit-status--previous-line)
   (define-key gitgit-status-mode-map "n" 'gitgit-status--next-line)
   (define-key gitgit-status-mode-map "g" 'gitgit-status--reload-process)
+  (define-key gitgit-status-mode-map "\C-c\C-c" 'gitgit-status--reload-process)
   (define-key gitgit-status-mode-map "a" 'gitgit-status--git-add)
   (define-key gitgit-status-mode-map "b" 'gitgit-status--git-blame)
   (define-key gitgit-status-mode-map "d" 'gitgit-status--git-remove)

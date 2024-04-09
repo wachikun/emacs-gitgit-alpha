@@ -158,40 +158,40 @@ ls -l /tmp/$NAME.tar.gz
 # (一括して設定するため、他とは異なる少し特殊な指定方法となっていることに注意)
 " texe-special-comment-special-regexp "-begin
 (texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-set-buffer-name-suffix \"-grep\") (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
- ?\\(grep\\|rg\\|hw\\|ag\\)
+\\b\\(grep\\|rg\\|hw\\|ag\\)\\b
 
 (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-buffer-name-suffix \"-diff\") (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
- ?diff
+\\bdiff\\b
 
 (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-buffer-name-suffix \"-log\") (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
- log
+ log\\b
 
 (texe-special-set-major-mode 'gitgit-blame-mode) (texe-special-set-buffer-name-suffix \"-blame\") (texe-special-set-goto-point-min-p t)
- blame
+ blame\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-branch\")
- branch
+ branch\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-display-process-running-p nil) (texe-special-set-buffer-name-suffix \"-commit\")
- commit
+ commit\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-checkout\")
- checkout
+ checkout\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-switch\")
- switch
+ switch\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-display-process-running-p nil) (texe-special-set-buffer-name-suffix \"-merge\")
- merge
+ merge\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-display-process-running-p nil) (texe-special-set-buffer-name-suffix \"-rebase\")
- rebase
+ rebase\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-push\")
- push
+ push\\b
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-pull\")
- pull
+ pull\\b
 " texe-special-comment-special-regexp "-end
 
 

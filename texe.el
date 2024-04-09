@@ -58,6 +58,11 @@
                             ("^[ \t]*\\(#[^@].*\\)" 1 'texe--face-comment)
                             ("^[ \t]*\\(;.*\\)" 1 'font-lock-comment-face)))
   (texe-l-setup-default-special-regexp)
+  (add-hook 'after-save-hook
+            #'(lambda ()
+                (texe-l-setup-default-special-regexp))
+            nil
+            'texe-mode-after-save-local)
   (if texe-mode
       (use-local-map texe-mode-map)
     (use-local-map nil)))

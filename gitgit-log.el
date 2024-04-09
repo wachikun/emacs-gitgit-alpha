@@ -211,11 +211,11 @@
                 (pop-to-buffer buffer)
               (gitgit-log--run (concat "git cat-file -p " revision ":" file-name)
                                "cat"
-                               (lambda ()
-                                 (texe-set-point-min)
-                                 (set-visited-file-name visited-file-name)
-                                 (view-mode)
-                                 (set-buffer-modified-p nil))
+                               #'(lambda ()
+                                   (texe-set-point-min)
+                                   (set-visited-file-name visited-file-name)
+                                   (view-mode)
+                                   (set-buffer-modified-p nil))
                                file-name)))
         (message "parameter not found")))))
 

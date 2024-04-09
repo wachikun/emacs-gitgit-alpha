@@ -86,9 +86,9 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                               command
                               async-process-buffer-name
                               args-alist
-                              (lambda ()
-                                (texe--sentinel-callback)
-                                (delete-file (cdr (assq 'script-tmpfile texe-process-local-args-alist))))
+                              #'(lambda ()
+                                  (texe--sentinel-callback)
+                                  (delete-file (cdr (assq 'script-tmpfile texe-process-local-args-alist))))
                               buffer-erase-p
                               rerun-p
                               force-yes-p)))

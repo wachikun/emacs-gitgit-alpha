@@ -38,36 +38,36 @@
 
 (defun gitgit--texe-updater-verify ()
   (catch 'return
-    (gitgit--texe-updater-mapc (lambda (file-name)
-                                 (with-temp-buffer
-                                   (insert-file-contents file-name)
-                                   (goto-char (point-min))
-                                   (unless (search-forward gitgit-texe-special-system-scripts)
-                                     (message "Illegal texe: %s" file-name)
-                                     (throw 'return t)))))
+    (gitgit--texe-updater-mapc #'(lambda (file-name)
+                                   (with-temp-buffer
+                                     (insert-file-contents file-name)
+                                     (goto-char (point-min))
+                                     (unless (search-forward gitgit-texe-special-system-scripts)
+                                       (message "Illegal texe: %s" file-name)
+                                       (throw 'return t)))))
     nil))
 
 (defun gitgit--texe-updater-create-new-if-needed ()
-  (gitgit--texe-updater-mapc (lambda (file-name)
-                               (with-temp-buffer
-                                 (let ((original-buffer (current-buffer)))
-                                   (insert-file-contents file-name)
-                                   (with-temp-buffer
-                                     (insert-buffer-substring original-buffer)
-                                     (goto-char (point-min))
-                                     (search-forward gitgit-texe-special-system-scripts)
-                                     (beginning-of-line)
-                                     (delete-region (point)
-                                                    (point-max))
-                                     (insert gitgit-mode-default-texe-system)
-                                     (when (gitgit--texe-updater-diff-p file-name
-                                                                        (current-buffer)
-                                                                        original-buffer)
-                                       (write-region (point-min)
-                                                     (point-max)
-                                                     (concat file-name ".new")
-                                                     nil
-                                                     0)))))))
+  (gitgit--texe-updater-mapc #'(lambda (file-name)
+                                 (with-temp-buffer
+                                   (let ((original-buffer (current-buffer)))
+                                     (insert-file-contents file-name)
+                                     (with-temp-buffer
+                                       (insert-buffer-substring original-buffer)
+                                       (goto-char (point-min))
+                                       (search-forward gitgit-texe-special-system-scripts)
+                                       (beginning-of-line)
+                                       (delete-region (point)
+                                                      (point-max))
+                                       (insert gitgit-mode-default-texe-system)
+                                       (when (gitgit--texe-updater-diff-p file-name
+                                                                          (current-buffer)
+                                                                          original-buffer)
+                                         (write-region (point-min)
+                                                       (point-max)
+                                                       (concat file-name ".new")
+                                                       nil
+                                                       0)))))))
   nil)
 
 (defun gitgit--texe-updater-mapc (func)

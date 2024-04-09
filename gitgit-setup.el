@@ -86,8 +86,8 @@
             "*")))
 
 (defun gitgit--get-texe-full-path-name (initial-directory buffer-name)
-  (let ((cooked-alist (mapcar (lambda (a)
-                                (cons (expand-file-name (car a)) (cdr a)))
+  (let ((cooked-alist (mapcar #'(lambda (a)
+                                  (cons (expand-file-name (car a)) (cdr a)))
                               gitgit-texe-alist)))
     (let ((texe-file (cdr (assoc initial-directory cooked-alist))))
       (if texe-file
@@ -127,9 +127,9 @@
                   (insert (concat (nth 1 value)
                                   "\n")))
               (sort (hash-table-values gitgit-status-local-recent-files-hash)
-                    (lambda (a b)
-                      (time-less-p (nth 2 b)
-                                   (nth 2 a)))))
+                    #'(lambda (a b)
+                        (time-less-p (nth 2 b)
+                                     (nth 2 a)))))
         (setq buffer-read-only backup-buffer-read-only)))))
 
 (defun gitgit--status-sentinel-callback ()
@@ -183,7 +183,7 @@ texe 実行後に status を更新するための callback 。"
   (setq texe-buffer-not-found-supplementary-message
         " (rerun command M-x gitgit)")
   (setq texe-mode-local-run-core-special-alist (list (cons (concat gitgit-texe-special-comment-status-initialize-script
-                                                                   "-begin") (lambda (special command)
+                                                                   "-begin") #'(lambda (special command)
                                                                    (let ((args-alist (list (cons 'no-display-process-buffer t))))
                                                                      (texe-run-start-process t
                                                                                              special
@@ -192,7 +192,7 @@ texe 実行後に status を更新するための callback 。"
                                                                                              args-alist
                                                                                              'gitgit--status-sentinel-callback))))
                                                      (cons (concat gitgit-texe-special-comment-setup-modified-files-elisp
-                                                                   "-begin") (lambda (_special command)
+                                                                   "-begin") #'(lambda (_special command)
                                                                    (eval (car (read-from-string command))))))))
 
 (defun gitgit--draw-texe-buffer (texe-full-path-name)

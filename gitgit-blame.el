@@ -80,9 +80,9 @@
     (setq buffer-read-only nil)
     (gitgit-blame--move-information-text-to-overlay)
     (gitgit-status--sentinel-callback-not-rerun-status)
-    (gitgit-blame--change-major-mode-and-keep-blame-mode (lambda ()
-                                                           (set-visited-file-name (gitgit-blame-get-visited-file-name "blame"
-                                                                                                                      file-name revision))))
+    (gitgit-blame--change-major-mode-and-keep-blame-mode #'(lambda ()
+                                                             (set-visited-file-name (gitgit-blame-get-visited-file-name "blame"
+                                                                                                                        file-name revision))))
     (gitgit-blame--update-buffer-invisibility-spec)
     (let ((buffer-name (concat call-texe-buffer-name
                                " "
@@ -226,8 +226,8 @@
       (if (and revision file-name command)
           (gitgit-blame--run (concat command " " revision " -- " file-name)
                              (concat "blame-" revision "-" file-name)
-                             (lambda ()
-                               (gitgit-blame-setup-buffer revision))
+                             #'(lambda ()
+                                 (gitgit-blame-setup-buffer revision))
                              file-name)
         (message "parameter not found")))))
 
@@ -246,12 +246,12 @@
               (pop-to-buffer buffer)
             (gitgit-blame--run (concat "git cat-file -p " revision ":" file-name)
                                "cat"
-                               (lambda ()
-                                 (texe-set-point-min)
-                                 (set-visited-file-name (gitgit-blame-get-visited-file-name "cat"
-                                                                                            file-name revision))
-                                 (view-mode)
-                                 (set-buffer-modified-p nil))
+                               #'(lambda ()
+                                   (texe-set-point-min)
+                                   (set-visited-file-name (gitgit-blame-get-visited-file-name "cat"
+                                                                                              file-name revision))
+                                   (view-mode)
+                                   (set-buffer-modified-p nil))
                                file-name)))
       (message "parameter not found"))))
 
@@ -268,9 +268,9 @@
                                    " -- " file-name)
                            (concat "diff-" revision "~.." revision "-"
                                    file-name)
-                           (lambda ()
-                             (texe-set-point-min)
-                             (gitgit-diff-mode))
+                           #'(lambda ()
+                               (texe-set-point-min)
+                               (gitgit-diff-mode))
                            file-name)
       (message "parameter not found"))))
 
@@ -281,8 +281,8 @@
     (when update-text-and-overlay-p
       (setq buffer-read-only nil)
       (gitgit-blame--move-information-text-to-overlay)
-      (gitgit-blame--change-major-mode-and-keep-blame-mode (lambda ()
-                                                             (set-auto-mode)))
+      (gitgit-blame--change-major-mode-and-keep-blame-mode #'(lambda ()
+                                                               (set-auto-mode)))
       (set-buffer-modified-p nil)
       (setq buffer-read-only t))
     (setq buffer-invisibility-spec '()))
@@ -294,8 +294,8 @@
    ((eq 'gitgit-view-type-raw gitgit-blame-local--view-type)
     (when update-text-and-overlay-p
       (setq buffer-read-only nil)
-      (gitgit-blame--change-major-mode-and-keep-blame-mode (lambda ()
-                                                             (fundamental-mode)))
+      (gitgit-blame--change-major-mode-and-keep-blame-mode #'(lambda ()
+                                                               (fundamental-mode)))
       (gitgit-blame--move-information-overlay-to-text)
       (set-buffer-modified-p nil)
       (setq buffer-read-only t))
@@ -326,12 +326,12 @@
     (if revision
         (gitgit-blame--run (concat command " " revision)
                            "log"
-                           (lambda ()
-                             (texe-set-point-min)
-                             (let ((copy-local-variable-list (texe-process-get-local-variable-list)))
-                               (gitgit-log-mode)
-                               (texe-process-make-local-variable)
-                               (texe-process-update-local-variable-list copy-local-variable-list)))
+                           #'(lambda ()
+                               (texe-set-point-min)
+                               (let ((copy-local-variable-list (texe-process-get-local-variable-list)))
+                                 (gitgit-log-mode)
+                                 (texe-process-make-local-variable)
+                                 (texe-process-update-local-variable-list copy-local-variable-list)))
                            nil)
       (message "revision not found"))))
 

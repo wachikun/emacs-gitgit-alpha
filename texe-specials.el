@@ -44,10 +44,10 @@
                                          (cons 'texe-special-buffer-major-mode nil)
                                          (cons 'texe-special-user-callback nil)))
 (defun texe-specials-setup ()
-  (mapc (lambda (a)
-          (puthash (car a)
-                   (cdr a)
-                   texe-special-default-hash))
+  (mapc #'(lambda (a)
+            (puthash (car a)
+                     (cdr a)
+                     texe-special-default-hash))
         texe-special-default-alist))
 
 ;; setup

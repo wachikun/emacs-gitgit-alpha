@@ -246,8 +246,8 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
       (when file-list
         (setq command (concat command
                               " "
-                              (mapconcat (lambda (s)
-                                           (shell-quote-argument s))
+                              (mapconcat #'(lambda (s)
+                                             (shell-quote-argument s))
                                          file-list
                                          " "))))
       (when command-filter

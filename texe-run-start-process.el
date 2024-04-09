@@ -157,12 +157,12 @@
     (if (gethash 'texe-special-use-default-p special-result)
         (let ((found-default-special ""))
           (catch 'mapcar
-            (mapcar (lambda (pair)
-                      (let ((default-special (nth 0 pair))
-                            (command-regexp (nth 1 pair)))
-                        (when (string-match command-regexp command)
-                          (setq found-default-special default-special)
-                          (throw 'mapcar nil))))
+            (mapcar #'(lambda (pair)
+                        (let ((default-special (nth 0 pair))
+                              (command-regexp (nth 1 pair)))
+                          (when (string-match command-regexp command)
+                            (setq found-default-special default-special)
+                            (throw 'mapcar nil))))
                     (seq-partition texe-mode-local-default-special-regexp-list
                                    2)))
           (if (stringp special)
@@ -222,13 +222,13 @@
 (defun texe-l-setup-background-run-at-time (async-process-buffer-name async-process-back-buffer-name)
   (run-at-time texe--process-running-message-delay-second
                nil
-               (lambda ()
-                 (when (and (get-buffer async-process-buffer-name)
-                            (get-buffer async-process-back-buffer-name))
-                   (let ((window (get-buffer-window async-process-buffer-name)))
-                     (if window
-                         (set-window-buffer window async-process-back-buffer-name)
-                       (switch-to-buffer async-process-back-buffer-name)))))))
+               #'(lambda ()
+                   (when (and (get-buffer async-process-buffer-name)
+                              (get-buffer async-process-back-buffer-name))
+                     (let ((window (get-buffer-window async-process-buffer-name)))
+                       (if window
+                           (set-window-buffer window async-process-back-buffer-name)
+                         (switch-to-buffer async-process-back-buffer-name)))))))
 
 (defun texe-l-setup-foreground-run-at-time (async-process-buffer-name)
   (texe-l-setup-foreground-run-at-time-1 async-process-buffer-name
@@ -241,11 +241,11 @@
 (defun texe-l-setup-foreground-run-at-time-1 (async-process-buffer-name delay-second)
   (run-at-time delay-second
                nil
-               (lambda ()
-                 (when (and (get-buffer async-process-buffer-name)
-                            (get-process async-process-buffer-name))
-                   (with-current-buffer async-process-buffer-name
-                     (texe-l-show-process-buffer-content (current-buffer)))))))
+               #'(lambda ()
+                   (when (and (get-buffer async-process-buffer-name)
+                              (get-process async-process-buffer-name))
+                     (with-current-buffer async-process-buffer-name
+                       (texe-l-show-process-buffer-content (current-buffer)))))))
 
 (defun texe-l-setup-process-buffer (background-p special-result special command
                                                  args-alist sentinel-callback rerun-p force-yes-p

@@ -116,9 +116,9 @@
                   (remhash (nth 0
                                 (nth 0
                                      (sort (hash-table-values gitgit-status-local-recent-files-hash)
-                                           (lambda (a b)
-                                             (time-less-p (nth 2 a)
-                                                          (nth 2 b))))))
+                                           #'(lambda (a b)
+                                               (time-less-p (nth 2 a)
+                                                            (nth 2 b))))))
                            gitgit-status-local-recent-files-hash)
                   (delete-region (line-beginning-position)
                                  (1+ (line-end-position))))

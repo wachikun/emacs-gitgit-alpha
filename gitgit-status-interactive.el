@@ -180,8 +180,8 @@
           (gitgit-status--run nil
                               "blame"
                               "blame"
-                              (lambda ()
-                                (gitgit-blame-setup-buffer))
+                              #'(lambda ()
+                                  (gitgit-blame-setup-buffer))
                               file-list))))))
 
 (defun gitgit-status--git-remove ()
@@ -236,13 +236,13 @@
                         "log"
                         'gitgit-status--sentinel-callback-not-rerun-status
                         file-list
-                        (lambda (command)
-                          (if arg
-                              (replace-regexp-in-string " -n [0-9]+"
-                                                        (format " -n %d"
-                                                                (prefix-numeric-value arg))
-                                                        command)
-                            command)))))
+                        #'(lambda (command)
+                            (if arg
+                                (replace-regexp-in-string " -n [0-9]+"
+                                                          (format " -n %d"
+                                                                  (prefix-numeric-value arg))
+                                                          command)
+                              command)))))
 
 (defun gitgit-status--git-auto-revert-restore (line)
   (cond
@@ -270,20 +270,20 @@
   (interactive)
   (let* ((file-list-restore (gitgit-status--get-mark-file-names-or-current-file-name
                              'gitgit-status--git-auto-revert-restore))
-         (file-list-restore-staged (gitgit-status--get-mark-file-names-or-current-file-name (lambda (line)
-                                                                                              (gitgit-status--git-auto-revert-restore-staged
-                                                                                               line file-list-restore))))
-         (file-list-rm-cached (gitgit-status--get-mark-file-names-or-current-file-name (lambda (line)
-                                                                                         (gitgit-status--git-auto-revert-rm-cached
-                                                                                          line file-list-restore)))))
+         (file-list-restore-staged (gitgit-status--get-mark-file-names-or-current-file-name #'(lambda (line)
+                                                                                                (gitgit-status--git-auto-revert-restore-staged
+                                                                                                 line file-list-restore))))
+         (file-list-rm-cached (gitgit-status--get-mark-file-names-or-current-file-name #'(lambda (line)
+                                                                                           (gitgit-status--git-auto-revert-rm-cached
+                                                                                            line file-list-restore)))))
     (when (or file-list-restore file-list-restore-staged
               file-list-rm-cached)
       (let ((message ""))
         (when file-list-restore
           (setq message (concat message
                                 "restore \""
-                                (mapconcat (lambda (s)
-                                             (shell-quote-argument s))
+                                (mapconcat #'(lambda (s)
+                                               (shell-quote-argument s))
                                            file-list-restore
                                            " ")
                                 "\" ?")))
@@ -292,8 +292,8 @@
             (setq message (concat message "\n")))
           (setq message (concat message
                                 "restore --staged \""
-                                (mapconcat (lambda (s)
-                                             (shell-quote-argument s))
+                                (mapconcat #'(lambda (s)
+                                               (shell-quote-argument s))
                                            file-list-restore-staged
                                            " ")
                                 "\" ?")))
@@ -302,8 +302,8 @@
             (setq message (concat message "\n")))
           (setq message (concat message
                                 "rm --cached \""
-                                (mapconcat (lambda (s)
-                                             (shell-quote-argument s))
+                                (mapconcat #'(lambda (s)
+                                               (shell-quote-argument s))
                                            file-list-rm-cached
                                            " ")
                                 "\" ?")))

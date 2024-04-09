@@ -157,6 +157,9 @@ ls -l /tmp/$NAME.tar.gz
 # special 未指定時の挙動を eval される文字列と regexp で指定
 # (一括して設定するため、他とは異なる少し特殊な指定方法となっていることに注意)
 " texe-special-comment-special-regexp "-begin
+(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-set-buffer-name-suffix \"-grep\") (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
+ ?\\(grep\\|rg\\|hw\\|ag\\)
+
 (texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-buffer-name-suffix \"-diff\") (texe-special-set-keep-select-texe-buffer-p t) (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
  ?diff
 
@@ -189,9 +192,6 @@ ls -l /tmp/$NAME.tar.gz
 
 (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-buffer-name-suffix \"-pull\")
  pull
-
-(texe-special-set-major-mode 'gitgit-grep-mode) (texe-special-set-buffer-name-suffix \"-grep\") (if (texe-special-rerun-p) (texe-special-set-goto-point-min-p nil) (texe-special-set-goto-point-min-p t))
- ?\\(grep\\|rg\\|hw\\|ag\\) 
 " texe-special-comment-special-regexp "-end
 
 

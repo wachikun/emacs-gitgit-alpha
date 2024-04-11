@@ -172,6 +172,9 @@
                    (gitgit-status--mark)))
              hash)))
 
+(defun gitgit-status-set-header (header)
+  (setq header-line-format header))
+
 ;; (defun gitgit-status-set-mode-name-suffix (suffix)
 ;;   (setq mode-name (concat gitgit-status--mode-name " " suffix)))
 

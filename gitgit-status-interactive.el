@@ -163,6 +163,7 @@
   (let ((file-list (gitgit-status--get-mark-file-names-or-current-file-name
                     'gitgit-status--can-add)))
     (when file-list
+      (gitgit-status-set-header "ADD")
       (gitgit-status--run t "add" "add" 'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                           file-list))))
 
@@ -189,6 +190,7 @@
   (let ((file-list (gitgit-status--get-mark-file-names-or-current-file-name
                     'gitgit-status--can-remove)))
     (when file-list
+      (gitgit-status-set-header "REMOVE")
       (gitgit-status--run t "rm" "remove" 'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
                           file-list))))
 
@@ -309,6 +311,7 @@
                                 "\" ?")))
         (if (yes-or-no-p message)
             (progn
+              (gitgit-status-set-header "AUTO REVERT")
               (when file-list-restore
                 (gitgit-status--run t "restore" "auto-revert-restore"
                                     'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
@@ -338,8 +341,10 @@
     (setq file-list (append file-list
                             (list destination)))
     (if file-list
-        (gitgit-status--run t "mv" "mv" 'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
-                            file-list)
+        (progn
+          (gitgit-status-set-header "RENAME")
+          (gitgit-status--run t "mv" "mv" 'gitgit-status--sentinel-callback-rerun-status-kill-process-buffer
+                              file-list))
       (message "file-name not found"))))
 
 (defun gitgit-status--quit ()

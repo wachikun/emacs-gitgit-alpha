@@ -210,16 +210,11 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                 (yes-or-no-p (concat "run \"" command "\" ?")))
             (texe--run-core special
                             command
-                            (texe--get-process-buffer-name "CSproc")
+                            (concat (buffer-name) " texe process")
                             t
                             nil
                             force-yes-p)
           (message "canceled!"))))))
-
-(defun texe--get-process-buffer-name (buffer-suffix)
-  (concat (buffer-name)
-          " "
-          buffer-suffix))
 
 (defun texe--run-core (special command async-process-buffer-name
                                buffer-erase-p rerun-p force-yes-p)

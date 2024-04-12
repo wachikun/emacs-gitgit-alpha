@@ -210,7 +210,7 @@ texe 外部から実行後のタイミングで呼び出したい場合に使用する。")
                 (yes-or-no-p (concat "run \"" command "\" ?")))
             (texe--run-core special
                             command
-                            (concat (buffer-name) " texe process")
+                            (concat (buffer-name) " TP")
                             t
                             nil
                             force-yes-p)

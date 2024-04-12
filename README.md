@@ -144,18 +144,18 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 
 |関数名|説明|
 |--|--|
-|`(texe-special-ignore-default)`|正規表現で指定される文字列を含むコマンドに対する default 設定を適用しない|
-|`(texe-special-ignore-callback)`|texe 実行後の callback を無視する|
-|`(texe-special-set-callback)`|texe 実行後の callback を設定|
-|`(texe-special-buffer-name-suffix "suffix")`|出力バッファの suffix を指定|
-|`(texe-special-buffer-name-suffix-time "suffix")`|出力バッファの suffix と時刻を指定|
-|`(texe-special-set-major-mode 'major-mode-name)`|出力バッファの major-mode を指定|
-|`(texe-special-keep-select-texe-buffer)`|出力バッファにフォーカスを移動しない|
-|`(texe-special-no-display-process-buffer)`|出力バッファを表示しない|
-|`(texe-special-set-point-min)`|出力バッファの point を `(point-min)` に設定する|
-|`(texe-special-set-point-max)`|出力バッファの point を `(point-max)` に設定する|
-|`(texe-special-append-shell-command)`|シェルコマンドの最後に引数を追加する|
-|`(texe-special-rerun-p)`|リロードされた場合に t を返す|
+|`(texe-special-set-use-default-p enable-p)`|enable-p が t ならば正規表現で指定される文字列を含むコマンドに対する default 設定を適用する (dafault: t)|
+|`(texe-special-set-call-texe-callback-p enable-p)`|enable-p が t ならば texe 実行後の callback を呼び出す (dafault: t)|
+|`(texe-special-set-user-callback callback)`|texe 実行後の callback を設定 (dafault: nil)|
+|`(texe-special-set-buffer-name-suffix "suffix")`|出力バッファの suffix を指定 (dafault: nil)|
+|`(texe-special-set-buffer-name-suffix-time "suffix")`|出力バッファの suffix と時刻を指定| (dafault: nil)
+|`(texe-special-set-major-mode 'major-mode-name)`|出力バッファの major-mode を指定 (dafault: nil)|
+|`(texe-special-set-keep-select-texe-buffer-p enable-p)`|enable-p が t ならばフォーカスを texe window のままにする (dafault: nil)|
+|`(texe-special-set-display-process-buffer-p enable-p)`|enable-p が t ならば出力バッファを表示する (dafault: t)|
+|`(texe-special-set-goto-point-min-p enable-p)`|enable-p が t ならば出力バッファの point を `(point-min)` に設定する (dafault: nil)|
+|`(texe-special-set-goto-point-max-p enable-p)`|enable-p が t ならば出力バッファの point を `(point-max)` に設定する (dafault: nil)|
+|`(texe-special-set-append-shell-command COMMAND)`|シェルコマンドの最後に COMMAND を追加する (dafault: nil)|
+|`(texe-special-rerun-p)`|rerun ならば t を返す|
 
 上記の他に、特殊なコマンドとして `@FORCE-YES` というものがあります。これを先頭に付加することでコマンド実行時の `yes-or-no-p` を省略します。
 
@@ -165,6 +165,6 @@ special と呼ばれる特殊な行で、コマンド実行のふるまいを設
 ### 出力バッファの suffix を "-DIFF" にして major-mode を gitgit-diff-mode にする
 
 ```elisp
-#@(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-buffer-name-suffix "-DIFF")
+#@(texe-special-set-major-mode 'gitgit-diff-mode) (texe-special-set-buffer-name-suffix "-DIFF")
 git diff
 ```

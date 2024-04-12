@@ -414,6 +414,7 @@
          (log-buffer-name (concat commit-buffer-name "-log"))
          (branch (gitgit-get-branch-from-top-line)))
     (save-excursion
+      (gitgit-status-set-header "COMMIT")
       (gitgit-status--run-1 no-display-process-buffer-p
                             git-command commit-buffer-name sentinel-callback
                             file-list command-filter t))

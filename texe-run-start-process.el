@@ -250,41 +250,43 @@
 (defun texe-l-setup-process-buffer (background-p special-result special command
                                                  args-alist sentinel-callback rerun-p force-yes-p
                                                  call-texe-buffer-name backup-point-alist current-async-process-buffer-name)
-  (with-current-buffer (get-buffer-create current-async-process-buffer-name)
-    (setq buffer-undo-list t)
-    (setq buffer-read-only nil)
-    (erase-buffer)
-    (setq buffer-read-only t)
-    (with-environment-variables (("PAGER" ""))
-      (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist))) process)
-        (unless (or rerun-p script-tmpfile)
-          (let ((command-append (gethash 'texe-special-append-shell-command
-                                         special-result)))
-            (when command-append
-              (setq command (concat command command-append)))))
-        (setq process (start-process-shell-command current-async-process-buffer-name
-                                                   current-async-process-buffer-name
-                                                   (if script-tmpfile script-tmpfile command)))
-        (set-process-sentinel process 'texe-l-process-sentinel)
-        (texe-mode-process-mode)
-        (texe-process-make-local-variable)
-        (setq texe-process-local-backup-point-alist
-              backup-point-alist)
-        (setq texe-process-local-special special)
-        (setq texe-process-local-special-result special-result)
-        (setq texe-process-local-command command)
-        (setq texe-process-local-process process)
-        (setq texe-process-local-args-alist args-alist)
-        (setq texe-process-local-sentinel-callback
-              sentinel-callback)
-        (setq texe-process-local-information (list (cons 'buffer-name (buffer-name))
-                                                   (cons 'special special)
-                                                   (cons 'command command)
-                                                   (cons 'force-yes-p force-yes-p)
-                                                   (cons 'start-time (current-time))))
-        (setq texe-process-local-background-p background-p)))
-    (add-to-list 'texe-process-local-args-alist
-                 (cons 'i-texe-buffer-name call-texe-buffer-name))))
+  (let ((caller-default-directory default-directory))
+    (with-current-buffer (get-buffer-create current-async-process-buffer-name)
+      (setq default-directory caller-default-directory)
+      (setq buffer-undo-list t)
+      (setq buffer-read-only nil)
+      (erase-buffer)
+      (setq buffer-read-only t)
+      (with-environment-variables (("PAGER" ""))
+        (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist))) process)
+          (unless (or rerun-p script-tmpfile)
+            (let ((command-append (gethash 'texe-special-append-shell-command
+                                           special-result)))
+              (when command-append
+                (setq command (concat command command-append)))))
+          (setq process (start-process-shell-command (buffer-name)
+                                                     (buffer-name)
+                                                     (if script-tmpfile script-tmpfile command)))
+          (set-process-sentinel process 'texe-l-process-sentinel)
+          (texe-mode-process-mode)
+          (texe-process-make-local-variable)
+          (setq texe-process-local-backup-point-alist
+                backup-point-alist)
+          (setq texe-process-local-special special)
+          (setq texe-process-local-special-result special-result)
+          (setq texe-process-local-command command)
+          (setq texe-process-local-process process)
+          (setq texe-process-local-args-alist args-alist)
+          (setq texe-process-local-sentinel-callback
+                sentinel-callback)
+          (setq texe-process-local-information (list (cons 'buffer-name (buffer-name))
+                                                     (cons 'special special)
+                                                     (cons 'command command)
+                                                     (cons 'force-yes-p force-yes-p)
+                                                     (cons 'start-time (current-time))))
+          (setq texe-process-local-background-p background-p)))
+      (add-to-list 'texe-process-local-args-alist
+                   (cons 'i-texe-buffer-name call-texe-buffer-name)))))
 
 (defun texe-l-display-async-process-buffer (background-p special-result async-process-buffer-name
                                                          async-process-back-buffer-name args-alist)

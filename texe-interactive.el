@@ -65,6 +65,18 @@
         (switch-to-buffer buffer-name)
       (message "texe buffer not found%s" texe-buffer-not-found-supplementary-message))))
 
+(defun texe-process-mode-show-last-command ()
+  (interactive)
+  (if texe-process-local-information
+      (let ((new-buffer (get-buffer-create (concat (buffer-name) " show command")))
+            (information texe-process-local-information))
+        (with-current-buffer new-buffer
+          (erase-buffer)
+          (insert (cdr (assq 'command information)))
+          (goto-char (point-min)))
+        (pop-to-buffer new-buffer))
+    (message "texe-run information not found")))
+
 (defun texe--comment (arg)
   "texe--comment"
   (interactive "*P")

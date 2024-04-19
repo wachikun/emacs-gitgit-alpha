@@ -79,7 +79,11 @@
             'texe-process-mode-cancel-process)
 (define-key texe-mode-process-mode-map "!"
             'texe-process-mode-switch-to-texe)
+(define-key texe-mode-process-mode-map "?"
+            'texe-process-mode-show-last-command)
 (define-key texe-mode-process-mode-map "g"
+            'texe-rerun)
+(define-key texe-mode-process-mode-map "\C-c\C-c"
             'texe-rerun)
 
 (provide 'texe-vars)

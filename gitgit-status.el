@@ -229,11 +229,11 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
           (if command command not-found))
       not-found)))
 
-(defun gitgit-status--run-1 (no-display-process-buffer-p git-command buffer-name
-                                                         sentinel-callback file-list command-filter
-                                                         buffer-erase-p)
+(defun gitgit-status--run-1 (no-display-process-buffer-p status-search
+                                                         git-command buffer-name sentinel-callback
+                                                         file-list command-filter buffer-erase-p)
   (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
-    (let* (special (search-special (concat "#@gitgit-status-" git-command))
+    (let* (special (search-special (concat "#@gitgit-status-" status-search))
                    (command (gitgit-status--get-command search-special
                                                         gitgit-internal-git-command))
                    (args-alist (list (cons 'file-list file-list)
@@ -259,13 +259,14 @@ diff/log など、実行後に status が変化しない場合に呼び出す。"
                               buffer-name args-alist sentinel-callback buffer-erase-p
                               nil t))))
 
-(defun gitgit-status--run (no-display-process-buffer-p git-command buffer-name-suffix
-                                                       sentinel-callback &optional file-list command-filter)
+(defun gitgit-status--run (no-display-process-buffer-p status-search
+                                                       git-command buffer-name-suffix sentinel-callback
+                                                       &optional file-list command-filter)
   (let ((buffer-name (concat (gitgit-get-texe-buffer-name-from-related-buffer)
                              " "
                              buffer-name-suffix)))
     (gitgit-status--run-1 no-display-process-buffer-p
-                          git-command buffer-name sentinel-callback
+                          status-search git-command buffer-name sentinel-callback
                           file-list command-filter nil)))
 
 (provide 'gitgit-status)

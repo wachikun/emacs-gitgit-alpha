@@ -354,6 +354,10 @@ git diff
 
 #@gitgit-status-commit (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-use-default-p nil)
 git commit
+
+
+#@gitgit-status-commit-information-log (texe-special-set-keep-select-texe-buffer-p t) (texe-special-set-use-default-p nil) (texe-special-set-major-mode 'gitgit-log-mode) (texe-special-set-goto-point-min-p t)
+git log -n 4
 "))
 
 (defconst gitgit-mode-default-texe (concat gitgit-mode-default-texe-user gitgit-mode-default-texe-system))

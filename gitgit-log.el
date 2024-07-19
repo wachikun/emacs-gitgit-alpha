@@ -233,6 +233,7 @@
               (gitgit-status--run nil
                                   "diff"
                                   "diff"
+                                  "diff"
                                   'gitgit-status--sentinel-callback-not-rerun-status
                                   (list (concat revision "~")
                                         revision))))

@@ -58,6 +58,8 @@
 
 (defconst gitgit-status-process-running-message-delay-second
   0.3)
+(defconst gitgit-status-timer-second 2)
+(defconst gitgit-dot-directory-regexp "/\\.[^/]*/")
 
 (defconst gitgit-mode-default-texe-user (concat "# This is gitgit-mode-default-texe.
 #
@@ -402,6 +404,7 @@ temporary-file-directory とは別に userid ごとに用意しておく。
 
 (defvar gitgit--initial-directory-hash (make-hash-table :test 'equal))
 (defvar gitgit--buffer-name-count-hash (make-hash-table :test 'equal))
+(defvar gitgit--status-after-save-timer-hash (make-hash-table :test 'equal))
 
 (defcustom gitgit-texe-alist nil "directory ごとに texe を
 \='((directory-a . texe-a) (directory-b . texe-b)) な alist で指定する。

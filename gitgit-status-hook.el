@@ -28,7 +28,7 @@
 
 ;;; Code:
 
-(defun gitgit-status-after-save-hook-add-modified-files (check-file-name)
+(defun gitgit-status-after-save-hook-add-modified-files (saved-buffer-file-name)
   (save-excursion
     (goto-char (point-min))
     (when (re-search-forward (concat "^" gitgit-texe-special-comment-modified-files
@@ -38,7 +38,7 @@
       (let* ((backup-buffer-read-only buffer-read-only)
              (dir-regexp (concat "^"
                                  (expand-file-name default-directory)))
-             (cooked-check-file-name (replace-regexp-in-string dir-regexp "" check-file-name)))
+             (cooked-check-file-name (replace-regexp-in-string dir-regexp "" saved-buffer-file-name)))
         (unless (gethash cooked-check-file-name gitgit-status-local-after-save-hash)
           (puthash cooked-check-file-name t gitgit-status-local-after-save-hash)
           (forward-line 1)
@@ -49,20 +49,31 @@
           (gitgit-status--set-file-line-face)
           (setq buffer-read-only backup-buffer-read-only))))))
 
-(defun gitgit-status-after-save-hook-rerun (_check-file-name)
+(defun gitgit-status-after-save-hook-rerun (_saved-buffer-file-name)
   (gitgit-status--rerun-process))
 
+(defun gitgit-status--timer ()
+  (maphash #'(lambda (saved-buffer-file-name status-buffer)
+               (when (get-buffer (buffer-name status-buffer))
+                 (with-current-buffer status-buffer
+                   (funcall gitgit-status-local-modified-files-function
+                            saved-buffer-file-name))))
+           gitgit--status-after-save-timer-hash)
+  (clrhash gitgit--status-after-save-timer-hash))
+
 (defun gitgit-status--after-save-hook ()
-  (mapc #'(lambda (buffer)
-            (when (string-match gitgit-texe-status-buffer-regexp (buffer-name buffer))
-              (let ((check-buffer-file-name buffer-file-name))
-                (unless (string-match "/\\.git/" check-buffer-file-name)
-                  (with-current-buffer buffer
+  (mapc #'(lambda (search-buffer)
+            (when (string-match gitgit-texe-status-buffer-regexp (buffer-name search-buffer))
+              (let ((saved-buffer-file-name buffer-file-name)
+                    (status-buffer search-buffer))
+                (unless (string-match gitgit-dot-directory-regexp
+                                      saved-buffer-file-name)
+                  (with-current-buffer status-buffer
                     (let ((dir-regexp (concat "^"
                                               (expand-file-name default-directory))))
-                      (when (string-match dir-regexp check-buffer-file-name)
-                        (funcall gitgit-status-local-modified-files-function
-                                 check-buffer-file-name))))))))
+                      (when (string-match dir-regexp saved-buffer-file-name)
+                        (puthash saved-buffer-file-name status-buffer
+                                 gitgit--status-after-save-timer-hash))))))))
         (buffer-list)))
 
 (defun gitgit-status--buffer-list-update-hook-1 (check-buffer-file-name buffer)
@@ -134,6 +145,8 @@
                  check-buffer-file-name buffer))
             (buffer-list)))))
 
+(run-at-time gitgit-status-timer-second gitgit-status-timer-second
+             'gitgit-status--timer)
 (add-hook 'after-save-hook 'gitgit-status--after-save-hook)
 (add-hook 'buffer-list-update-hook 'gitgit-status--buffer-list-update-hook)
 

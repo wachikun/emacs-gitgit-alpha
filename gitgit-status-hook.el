@@ -53,13 +53,18 @@
   (gitgit-status--rerun-process))
 
 (defun gitgit-status--timer ()
-  (maphash #'(lambda (saved-buffer-file-name status-buffer)
-               (when (get-buffer (buffer-name status-buffer))
-                 (with-current-buffer status-buffer
-                   (funcall gitgit-status-local-modified-files-function
-                            saved-buffer-file-name))))
-           gitgit--status-after-save-timer-hash)
-  (clrhash gitgit--status-after-save-timer-hash))
+  (let (remove-keys)
+    (maphash #'(lambda (saved-buffer-file-name status-buffer)
+                 (when (get-buffer (buffer-name status-buffer))
+                   (with-current-buffer status-buffer
+                     (unless (texe-process-running-p (gitgit-status-get-process-back-buffer-name (buffer-name)))
+                       (push saved-buffer-file-name remove-keys)
+                       (funcall gitgit-status-local-modified-files-function
+                                saved-buffer-file-name)))))
+             gitgit--status-after-save-timer-hash)
+    (mapcar #'(lambda (saved-buffer-file-name)
+                (remhash saved-buffer-file-name gitgit--status-after-save-timer-hash))
+            remove-keys)))
 
 (defun gitgit-status--after-save-hook ()
   (mapc #'(lambda (search-buffer)

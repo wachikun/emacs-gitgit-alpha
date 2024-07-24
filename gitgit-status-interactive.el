@@ -197,18 +197,26 @@
 
 (defun gitgit-status--git-diff-current-file (arg)
   (interactive "P")
-  (let ((current-staged-file-name (gitgit-status--get-current-file-name 'gitgit-status--can-diff-staged))
-        (diff (if arg "diff" "diff --staged"))
-        file-list)
+  (let ((current-staged-file-name (gitgit-status--get-current-file-name 'gitgit-status--can-diff-staged)) file-list staged-p)
     (if current-staged-file-name
-        (push current-staged-file-name file-list)
-      (setq diff "diff")
+        (progn
+          (push current-staged-file-name file-list)
+          (unless arg
+            (setq staged-p t)))
       (when (gitgit-status--get-current-file-name 'gitgit-status--can-diff)
         (push (gitgit-status--get-current-file-name 'gitgit-status--can-diff)
               file-list)))
-    (gitgit-status--run nil "diff" diff "diff"
+    (gitgit-status--run nil
+                        "diff"
+                        "diff"
+                        "diff"
                         'gitgit-status--sentinel-callback-not-rerun-status
-                        file-list)))
+                        file-list
+                        #'(lambda (command)
+                            (if staged-p
+                                (replace-regexp-in-string " diff" " diff --staged"
+                                                          command)
+                              command)))))
 
 (defun gitgit-status--git-diff-mark-files (arg)
   (interactive "P")
@@ -216,19 +224,27 @@
                        'gitgit-status--can-diff-staged))
         (not-staged-files (gitgit-status--get-mark-file-names-or-current-file-name
                            'gitgit-status--can-diff-not-staged))
-        (diff (if arg "diff" "diff --staged"))
         file-list
         staged-p)
     (if (and staged-files not-staged-files)
         (setq staged-p (yes-or-no-p "diff staged?"))
       (setq staged-p staged-files))
+    (when arg
+      (setq staged-p nil))
     (if staged-p
         (setq file-list staged-files)
-      (setq file-list not-staged-files)
-      (setq diff "diff"))
-    (gitgit-status--run nil "diff" diff "diff"
+      (setq file-list not-staged-files))
+    (gitgit-status--run nil
+                        "diff"
+                        "diff"
+                        "diff"
                         'gitgit-status--sentinel-callback-not-rerun-status
-                        file-list)))
+                        file-list
+                        #'(lambda (command)
+                            (if staged-p
+                                (replace-regexp-in-string " diff" " diff --staged"
+                                                          command)
+                              command)))))
 
 (defun gitgit-status--git-log (arg)
   (interactive "P")

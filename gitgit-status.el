@@ -164,11 +164,11 @@
       (texe-set-line-face-if-need)
       (forward-line 1))))
 
-(defun gitgit-status-mark-hash (hash)
+(defun gitgit-status-mark-hash-for-rerun (hash)
   (save-excursion
     (maphash #'(lambda (key _value)
                  (goto-char (point-min))
-                 (when (gitgit-status--mark-re-search-forward key)
+                 (when (gitgit-status--mark-re-search-forward (format " %s$" key))
                    (gitgit-status--mark)))
              hash)))
 

@@ -166,7 +166,7 @@ status 生成 (rerun) 後に呼ばれる callback。"
     (gitgit--update-git-and-files-end-points)
     (gitgit-status-update-faces)
     (when backup-local-mark-hash
-      (gitgit-status-mark-hash backup-local-mark-hash))
+      (gitgit-status-mark-hash-for-rerun backup-local-mark-hash))
     (when backup-local-recent-files-hash
       (setq gitgit-status-local-recent-files-hash
             backup-local-recent-files-hash))))

@@ -197,7 +197,8 @@
 
 (defun gitgit-status--git-diff-current-file (arg)
   (interactive "P")
-  (let ((current-staged-file-name (gitgit-status--get-current-file-name 'gitgit-status--can-diff-staged)) file-list staged-p)
+  (let ((current-staged-file-name (gitgit-status--get-current-file-name 'gitgit-status--can-diff-staged)) file-list
+        staged-p)
     (if current-staged-file-name
         (progn
           (push current-staged-file-name file-list)
@@ -451,11 +452,13 @@
   "file-name を持つ git files または files を re-search-forward する"
   (if (string-match "^.. \\(.+\\)" file-name)
       (re-search-forward (concat "^.. "
-                                 (regexp-quote (match-string 1 file-name)))
+                                 (regexp-quote (match-string 1 file-name))
+                                 "$")
                          gitgit-status-local-end-of-git-status-point
                          t)
     (re-search-forward (concat "^"
-                               (regexp-quote file-name))
+                               (regexp-quote file-name)
+                               "$")
                        gitgit-status-local-end-of-files-point
                        t)))
 

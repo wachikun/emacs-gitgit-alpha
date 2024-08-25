@@ -168,7 +168,7 @@
   (save-excursion
     (maphash #'(lambda (key _value)
                  (goto-char (point-min))
-                 (when (gitgit-status--mark-re-search-forward (format " %s$" key))
+                 (when (gitgit-status--mark-re-search-forward key)
                    (gitgit-status--mark)))
              hash)))
 

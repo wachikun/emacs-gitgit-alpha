@@ -76,7 +76,8 @@
   (define-key gitgit-log-mode-map "n" 'gitgit-log--next)
   (define-key gitgit-log-mode-map "p" 'gitgit-log--previous)
   (define-key gitgit-log-mode-map " " 'scroll-up)
-  (define-key gitgit-log-mode-map "\C-m" 'gitgit-log--enter)
+  (define-key gitgit-log-mode-map "\C-m" 'gitgit-log--open-file)
+  (define-key gitgit-log-mode-map "f" 'gitgit-log--open-file)
   (define-key gitgit-log-mode-map "=" 'gitgit-log--diff)
   (define-key gitgit-log-mode-map "!" 'gitgit-switch-to-texe)
   (define-key gitgit-log-mode-map "\C-c\C-v"
@@ -186,7 +187,7 @@
   (beginning-of-line)
   (recenter 0))
 
-(defun gitgit-log--enter (arg)
+(defun gitgit-log--open-file (arg)
   (interactive "P")
   (if arg
       (gitgit-log--cat)

@@ -203,7 +203,17 @@ commit/add/rm/restore など、実行後に status が変化する場合に呼び出す。
   (texe-special-update-point texe-process-local-special-result)
   (texe-special-change-major-mode-if-match texe-process-local-special-result)
   (setq gitgit-status-local-ignore-rerun t)
-  (gitgit-status--rerun-status))
+  (gitgit-status--rerun-status)
+  (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
+    (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
+      (when (> (point) gitgit-status-local-end-of-git-status-point)
+        (mapcar #'(lambda (window)
+                    (set-window-start window
+                                      (point-min))
+                    (set-window-point window
+                                      (point-min)))
+                (get-buffer-window-list (current-buffer)))
+        (goto-char (point-min))))))
 
 (defun gitgit-status--sentinel-callback-rerun-status-kill-process-buffer ()
   "gitgit-status $B用の rerun sentinel callback

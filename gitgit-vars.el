@@ -59,7 +59,8 @@
 (defconst gitgit-status-process-running-message-delay-second
   0.3)
 (defconst gitgit-status-timer-second 2)
-(defconst gitgit-dot-directory-regexp "/\\.[^/]*/")
+(defconst gitgit-vcs-dot-directory-regexp
+  "/\\.git/\\|/\\.svn/")
 
 (defconst gitgit-mode-default-texe-user (concat "# This is gitgit-mode-default-texe.
 #

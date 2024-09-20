@@ -71,7 +71,7 @@
             (when (string-match gitgit-texe-status-buffer-regexp (buffer-name search-buffer))
               (let ((saved-buffer-file-name buffer-file-name)
                     (status-buffer search-buffer))
-                (unless (string-match gitgit-dot-directory-regexp
+                (unless (string-match gitgit-vcs-dot-directory-regexp
                                       saved-buffer-file-name)
                   (with-current-buffer status-buffer
                     (let ((dir-regexp (concat "^"

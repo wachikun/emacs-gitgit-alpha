@@ -259,6 +259,7 @@ texe 実行後に status を更新するための callback 。"
     (gitgit--draw-texe-buffer texe-full-path-name)
     (gitgit--setup-texe-mode)
     (gitgit--run-initialize-scripts)
+    (gitgit--setup-long-run-message status-buffer-name)
     (add-hook 'texe-sentinel-callback-hook 'gitgit--texe-sentinel-callback)
     (switch-to-buffer status-buffer-name)))
 
@@ -271,10 +272,16 @@ texe 実行後に status を更新するための callback 。"
       (with-current-buffer texe-buffer-name
         (gitgit--setup-texe-mode))
       (gitgit--setup-after-second-1 texe-buffer-name)
-      (message "REVERT DETECTED TEXE BUFFER"))))
+      (message "REVERT DETECTED TEXE BUFFER"))
+    (gitgit--setup-long-run-message (buffer-name))))
 
 (defun gitgit--setup-after-second-1 (texe-buffer-name)
   (with-current-buffer texe-buffer-name
     (gitgit--run-initialize-scripts)))
+
+(defun gitgit--setup-long-run-message (status-buffer-name)
+  (with-current-buffer (texe-get-process-back-buffer-name status-buffer-name)
+    (setcdr (assq 'long-run-message-p texe-process-local-information)
+            nil)))
 
 (provide 'gitgit-setup)

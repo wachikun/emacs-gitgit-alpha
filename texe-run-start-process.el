@@ -57,6 +57,9 @@
 (defconst texe--process-running-recenter-delay-second-second
   2)
 
+(defconst texe--header-line-process-time-long-run-message-second
+  5)
+
 (defconst texe--special-eval-lisp-code-regexp
   "^\#?\@?[^(]*\\((.+\\)")
 
@@ -129,14 +132,21 @@
                                              (replace-regexp-in-string "[\r\n]+$" "" event))))
 
 (defun texe-set-header-line-process-time (base)
-  (setq header-line-format (format "%s %s - %s"
-                                   (format "%s %s"
-                                           base
-                                           (texe-sec-to-hms (float-time (time-subtract (current-time)
-                                                                                       (cdr (assq 'start-time texe-process-local-information))))))
-                                   (format-time-string "%Y-%m-%d %H:%M:%S"
-                                                       (cdr (assq 'start-time texe-process-local-information)))
-                                   (format-time-string "%Y-%m-%d %H:%M:%S"))))
+  (let* ((diff-sec (float-time (time-subtract (current-time)
+                                              (cdr (assq 'start-time texe-process-local-information)))))
+         (message (format "%s %s - %s"
+                          (format "%s %s"
+                                  base
+                                  (texe-sec-to-hms diff-sec))
+                          (format-time-string "%Y-%m-%d %H:%M:%S"
+                                              (cdr (assq 'start-time texe-process-local-information)))
+                          (format-time-string "%Y-%m-%d %H:%M:%S"))))
+    (setq header-line-format message)
+    (when (and (cdr (assq 'long-run-message-p texe-process-local-information))
+               (>= diff-sec texe--header-line-process-time-long-run-message-second))
+      (message "%s %s"
+               (buffer-name)
+               message))))
 
 (defun texe-sec-to-hms (sec)
   (let ((tmp ""))
@@ -283,7 +293,8 @@
                                                      (cons 'special special)
                                                      (cons 'command command)
                                                      (cons 'force-yes-p force-yes-p)
-                                                     (cons 'start-time (current-time))))
+                                                     (cons 'start-time (current-time))
+                                                     (cons 'long-run-message-p t)))
           (setq texe-process-local-background-p background-p)))
       (add-to-list 'texe-process-local-args-alist
                    (cons 'i-texe-buffer-name call-texe-buffer-name)))))

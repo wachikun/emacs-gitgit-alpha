@@ -198,28 +198,12 @@ texe $B<B9T8e$O(B status $B$,JQ2=$9$k2DG=@-$,$"$k$N$G!"K\(B callback $B$r8F
 (defun gitgit-status--sentinel-callback-rerun-status ()
   "gitgit-status $BMQ$N(B rerun sentinel callback
 commit/add/rm/restore $B$J$I!"<B9T8e$K(B status $B$,JQ2=$9$k>l9g$K8F$S=P$9!#(B"
-  (let (inside-cursor-p)
-    (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
-      (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
-        (let ((outside-cursor-p (> (point) gitgit-status-local-end-of-git-status-point)))
-          (setq inside-cursor-p (not outside-cursor-p)))))
-    (texe-update-point)
-    (texe-update-window-start texe-process-local-backup-point-alist)
-    (texe-special-update-point texe-process-local-special-result)
-    (texe-special-change-major-mode-if-match texe-process-local-special-result)
-    (setq gitgit-status-local-ignore-rerun t)
-    (gitgit-status--rerun-status)
-    (when inside-cursor-p
-      (with-current-buffer (gitgit-get-texe-buffer-name-from-related-buffer)
-        (with-current-buffer (gitgit-status-get-status-buffer-name (buffer-name))
-          (when (> (point) gitgit-status-local-end-of-git-status-point)
-            (mapcar #'(lambda (window)
-                        (set-window-start window
-                                          (point-min))
-                        (set-window-point window
-                                          (point-min)))
-                    (get-buffer-window-list (current-buffer)))
-            (goto-char (point-min))))))))
+  (texe-update-point)
+  (texe-update-window-start texe-process-local-backup-point-alist)
+  (texe-special-update-point texe-process-local-special-result)
+  (texe-special-change-major-mode-if-match texe-process-local-special-result)
+  (setq gitgit-status-local-ignore-rerun t)
+  (gitgit-status--rerun-status))
 
 (defun gitgit-status--sentinel-callback-rerun-status-kill-process-buffer ()
   "gitgit-status $BMQ$N(B rerun sentinel callback

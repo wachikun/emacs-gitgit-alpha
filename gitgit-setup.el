@@ -164,6 +164,14 @@ status 生成 (rerun) 後に呼ばれる callback。"
     (texe-process-make-local-variable)
     (texe-process-update-local-variable-list backup-local-variable-list)
     (gitgit--update-git-and-files-end-points)
+    (when (> (point) gitgit-status-local-end-of-git-status-point)
+      (mapcar #'(lambda (window)
+                  (set-window-start window
+                                    (point-min))
+                  (set-window-point window
+                                    (point-min)))
+              (get-buffer-window-list (current-buffer)))
+      (goto-char (point-min)))
     (gitgit-status-update-faces)
     (when backup-local-mark-hash
       (gitgit-status-mark-hash-for-rerun backup-local-mark-hash))

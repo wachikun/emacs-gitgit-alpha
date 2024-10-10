@@ -144,9 +144,10 @@
     (setq header-line-format message)
     (when (and (cdr (assq 'long-run-message-p texe-process-local-information))
                (>= diff-sec texe--header-line-process-time-long-run-message-second))
-      (message "%s %s"
-               (buffer-name)
-               message))))
+      (let ((inhibit-message t))
+        (message "%s %s"
+                 (buffer-name)
+                 message)))))
 
 (defun texe-sec-to-hms (sec)
   (let ((tmp ""))

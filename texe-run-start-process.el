@@ -118,20 +118,23 @@
                                              args-alist)))))
 
 (defun texe-set-header-line-process-terminated ()
-  (texe-set-header-line-process-time "TERMINATED"))
+  (texe-set-header-line-process-time "TERMINATED"
+                                     t))
 
 (defun texe-set-header-line-process-start ()
   (setq header-line-format (concat "PROCESS START "
                                    (format-time-string "%Y-%m-%d %H:%M:%S"))))
 
 (defun texe-set-header-line-process-success ()
-  (texe-set-header-line-process-time "DONE"))
+  (texe-set-header-line-process-time "DONE"
+                                     nil))
 
 (defun texe-set-header-line-process-error (event)
   (texe-set-header-line-process-time (concat "PROCESS ERROR event = "
-                                             (replace-regexp-in-string "[\r\n]+$" "" event))))
+                                             (replace-regexp-in-string "[\r\n]+$" "" event))
+                                     t))
 
-(defun texe-set-header-line-process-time (base)
+(defun texe-set-header-line-process-time (base message-p)
   (let* ((diff-sec (float-time (time-subtract (current-time)
                                               (cdr (assq 'start-time texe-process-local-information)))))
          (message (format "%s %s - %s"
@@ -143,7 +146,8 @@
                           (format-time-string "%Y-%m-%d %H:%M:%S"))))
     (setq header-line-format message)
     (when (and (cdr (assq 'long-run-message-p texe-process-local-information))
-               (>= diff-sec texe--header-line-process-time-long-run-message-second))
+               (or message-p
+                   (>= diff-sec texe--header-line-process-time-long-run-message-second)))
       (let ((inhibit-message t))
         (message "%s %s"
                  (buffer-name)

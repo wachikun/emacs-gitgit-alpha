@@ -65,6 +65,12 @@
   (interactive)
   (switch-to-buffer (gitgit-status-get-status-buffer-name (gitgit-get-texe-buffer-name-from-related-buffer))))
 
+(defun gitgit-toggle-diff-command ()
+  (interactive)
+  (if gitgit-status-diff-command
+      (setq gitgit-status-diff-command nil)
+    (setq gitgit-status-diff-command "difftool")))
+
 (defun gitgit-update-buffer-header-line (branch)
   (setq header-line-format (concat (propertize default-directory 'face 'gitgit--face-git-default-directory)
                                    "  "

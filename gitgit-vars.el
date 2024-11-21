@@ -365,6 +365,8 @@ git log -n 4
 
 (defconst gitgit-mode-default-texe (concat gitgit-mode-default-texe-user gitgit-mode-default-texe-system))
 
+(defvar gitgit-status-diff-command nil)
+
 (defvar gitgit-temporary-file-directory-for-visited-file-name
   nil "set-visited-file-name で特定の directory を必要とするため、
 temporary-file-directory とは別に userid ごとに用意しておく。

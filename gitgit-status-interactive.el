@@ -214,10 +214,8 @@
                         'gitgit-status--sentinel-callback-not-rerun-status
                         file-list
                         #'(lambda (command)
-                            (if staged-p
-                                (replace-regexp-in-string " diff" " diff --staged"
-                                                          command)
-                              command)))))
+                            (gitgit-status--diff-command-filter command
+                                                                staged-p)))))
 
 (defun gitgit-status--git-diff-mark-files (arg)
   (interactive "P")
@@ -242,10 +240,8 @@
                         'gitgit-status--sentinel-callback-not-rerun-status
                         file-list
                         #'(lambda (command)
-                            (if staged-p
-                                (replace-regexp-in-string " diff" " diff --staged"
-                                                          command)
-                              command)))))
+                            (gitgit-status--diff-command-filter command
+                                                                staged-p)))))
 
 (defun gitgit-status--git-log (arg)
   (interactive "P")
@@ -585,5 +581,16 @@
 
 (defun gitgit-status--can-rename (line)
   (gitgit-status--can-default line))
+
+(defun gitgit-status--diff-command-filter (command staged-p)
+  (setq command (if staged-p
+                    (replace-regexp-in-string " diff" " diff --staged"
+                                              command)
+                  command))
+  (if gitgit-status-diff-command
+      (replace-regexp-in-string " diff"
+                                (format " %s" gitgit-status-diff-command)
+                                command)
+    command))
 
 (provide 'gitgit-status-interactive)

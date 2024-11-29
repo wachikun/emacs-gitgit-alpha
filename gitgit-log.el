@@ -237,7 +237,10 @@
                                   "diff"
                                   'gitgit-status--sentinel-callback-not-rerun-status
                                   (list (concat revision "~")
-                                        revision))))
+                                        revision)
+                                  #'(lambda (command)
+                                      (gitgit-status--diff-command-filter command
+                                                                          nil)))))
         (message "not found")))))
 
 (provide 'gitgit-log)

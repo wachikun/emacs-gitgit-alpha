@@ -51,9 +51,10 @@
           (if (and (get-buffer texe-buffer-name)
                    (get-buffer (gitgit-status-get-status-buffer-name texe-buffer-name)))
               (progn
-                (gitgit--setup-after-second texe-buffer-name)
-                (unless rerun-p
-                  (let ((status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name)))
+                (let ((status-buffer-name (gitgit-status-get-status-buffer-name texe-buffer-name)))
+                  (gitgit--setup-after-second texe-buffer-name
+                                              status-buffer-name)
+                  (unless rerun-p
                     (switch-to-buffer status-buffer-name))))
             (gitgit--setup-first texe-buffer-name initial-directory))))
     (message "gitgit.el : %s is not directory!"
@@ -263,7 +264,7 @@ texe 実行後に status を更新するための callback 。"
     (add-hook 'texe-sentinel-callback-hook 'gitgit--texe-sentinel-callback)
     (switch-to-buffer status-buffer-name)))
 
-(defun gitgit--setup-after-second (texe-buffer-name)
+(defun gitgit--setup-after-second (texe-buffer-name status-buffer-name)
   (let (local-variable-found-p)
     (with-current-buffer texe-buffer-name
       (setq local-variable-found-p texe-mode-local-run-core-special-alist))
@@ -273,7 +274,7 @@ texe 実行後に status を更新するための callback 。"
         (gitgit--setup-texe-mode))
       (gitgit--setup-after-second-1 texe-buffer-name)
       (message "REVERT DETECTED TEXE BUFFER"))
-    (gitgit--setup-long-run-message (buffer-name))))
+    (gitgit--setup-long-run-message status-buffer-name)))
 
 (defun gitgit--setup-after-second-1 (texe-buffer-name)
   (with-current-buffer texe-buffer-name

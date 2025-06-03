@@ -271,6 +271,10 @@
       (setq buffer-undo-list t)
       (setq buffer-read-only nil)
       (erase-buffer)
+      (goto-char (point-min))
+      (let ((window (get-buffer-window (current-buffer))))
+        (when window
+          (set-window-start window (point-min))))
       (setq buffer-read-only t)
       (with-environment-variables (("PAGER" ""))
         (let* ((script-tmpfile (cdr (assq 'script-tmpfile args-alist))) process)

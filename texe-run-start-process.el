@@ -287,6 +287,7 @@
                                                      (buffer-name)
                                                      (if script-tmpfile script-tmpfile command)))
           (set-process-sentinel process 'texe-l-process-sentinel)
+          (set-process-filter process 'texe-l-process-filter)
           (texe-mode-process-mode)
           (texe-process-make-local-variable)
           (setq texe-process-local-backup-point-alist
@@ -360,6 +361,19 @@
                   (throw 'error tmp-special-local-result-hash)))))
           tmp-special-local-result-hash)
       (copy-hash-table texe-special-default-hash))))
+
+(defun texe-l-process-filter (proc string)
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (let ((moving (= (point) (process-mark proc))))
+        (save-excursion
+          (goto-char (process-mark proc))
+          (let ((backup-buffer-read-only buffer-read-only))
+            (setq buffer-read-only nil)
+            (insert string)
+            (setq buffer-read-only backup-buffer-read-only))
+          (set-marker (process-mark proc) (point)))
+        (if moving (goto-char (process-mark proc)))))))
 
 (defun texe-l-process-sentinel (process event)
   (with-current-buffer (process-buffer process)

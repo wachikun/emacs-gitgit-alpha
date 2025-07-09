@@ -104,6 +104,7 @@
   (define-key gitgit-status-mode-map "c" 'gitgit-status--run-commit)
   (define-key gitgit-status-mode-map "e" 'gitgit-status--run-find-file)
   (define-key gitgit-status-mode-map "f" 'gitgit-status--run-find-file)
+  (define-key gitgit-status-mode-map "v" 'gitgit-status--run-find-file-view)
   (define-key gitgit-status-mode-map "\C-m"
               'gitgit-status--run-find-file)
   (define-key gitgit-status-mode-map "m" 'gitgit-status--mark)

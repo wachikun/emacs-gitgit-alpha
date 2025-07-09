@@ -108,13 +108,26 @@
                                "commit" 'gitgit-status--sentinel-callback-rerun-status
                                nil))
 
-(defun gitgit-status--run-find-file ()
-  (interactive)
+(defun gitgit-status--run-find-file-1 (view-p directory-p)
   (let ((line (texe-get-line)))
     (unless (gitgit-status--ignore-p line)
       (let ((file-name (gitgit-status--get-current-file-name 'gitgit-status--can-find-file)))
-        (when (file-exists-p file-name)
-          (find-file file-name))))))
+        (if directory-p
+            (let ((directory-name (or (file-name-directory file-name)
+                                      "./")))
+              (find-file directory-name))
+          (when (file-exists-p file-name)
+            (if view-p
+                (view-file file-name)
+              (find-file file-name))))))))
+
+(defun gitgit-status--run-find-file (arg)
+  (interactive "P")
+  (gitgit-status--run-find-file-1 nil arg))
+
+(defun gitgit-status--run-find-file-view ()
+  (interactive)
+  (gitgit-status--run-find-file-1 t nil))
 
 (defun gitgit-status--mark ()
   (interactive)

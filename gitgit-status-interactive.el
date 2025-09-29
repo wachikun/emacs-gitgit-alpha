@@ -597,12 +597,12 @@
 
 (defun gitgit-status--diff-command-filter (command staged-p)
   (setq command (if staged-p
-                    (replace-regexp-in-string " diff" " diff --staged"
+                    (replace-regexp-in-string "\\(^[^	 ]+[	 ]+\\)diff" "\\1diff --staged"
                                               command)
                   command))
   (if gitgit-status-diff-command
-      (replace-regexp-in-string " diff"
-                                (format " %s" gitgit-status-diff-command)
+      (replace-regexp-in-string "\\(^[^	 ]+[	 ]+\\)diff"
+                                (format "\\1%s" gitgit-status-diff-command)
                                 command)
     command))
 

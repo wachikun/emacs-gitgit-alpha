@@ -53,7 +53,7 @@
 取得できるのはあくまでもバッファ名が関連バッファフォーマットである場合で、 texe-process などの
 任意のバッファ名からは取得できないことに注意。
 (texe-process では texe-process-local-args-alist の i-texe-buffer-name から取得する)"
-  (replace-regexp-in-string " [-.a-z0-9]+$"
+  (replace-regexp-in-string " [^ ]+$"
                             ""
                             (buffer-name)))
 
